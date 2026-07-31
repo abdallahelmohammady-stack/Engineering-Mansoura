@@ -271,7 +271,7 @@ function renderDept(deptId, year) {
             '<div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"><i class="fa ' + d.icon + '"></i></div>' +
             '<div>' +
               '<h1 class="text-xl sm:text-2xl font-black">' + esc(d.name) + '</h1>' +
-              '<p class="text-white/80 text-sm mt-1">' + esc(d.desc || '') + (d.noYears ? ' • محتوى السنة الإعدادية كلها هنا' : ' • اختار الفرقة من الشريط اللي تحت 👇') + '</p>' +
+              '<p class="text-white/80 text-sm mt-1">' + esc(d.desc || '') + (d.noYears ? ' • محتوى السنة الإعدادية كلها هنا' : 'اختار الفرقة من الشريط اللي تحت.') + '</p>' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -313,7 +313,7 @@ function renderDeptGrid() {
       (filtered.length === 0 ?
         '<div class="text-center py-20"><div class="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl text-gray-300"><i class="fa ' + (q ? 'fa-search' : 'fa-graduation-cap') + '"></i></div>' +
         '<p class="text-gray-400 font-semibold text-lg">' + (q ? '❌ لا توجد نتائج' : '📚 لسه مفيش محتوى في ' + esc(d.noYears ? 'القسم' : YEAR_NAMES[year])) + '</p>' +
-        (!q ? '<p class="text-gray-400 text-sm mt-2">أدمن القسم لسه مارفعش حاجة هنا — ارجع له تاني قريب 😉</p>' : '') +
+        (!q ? '<p class="text-gray-400 text-sm mt-2">أدمن القسم لسه مارفعش حاجة هنا — ارجع له تاني قريب</p>' : '') +
         '</div>'
       :
         '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">' +
