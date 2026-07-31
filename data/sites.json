@@ -1,0 +1,1403 @@
+{
+  "app": "eng-materials",
+  "version": 1,
+  "exportedAt": 1785458980053,
+  "exportedBy": "seed",
+  "departments": {
+    "prep": {
+      "years": {
+        "1": [
+          {
+            "id": "course-math2",
+            "title": "Math 2",
+            "doc": "Dr/Reda abdo , Dr/Ahmed nasr , Dr/Ahmed abdelkhalek , Dr/Asmaa",
+            "icon": "fa-calculator",
+            "color": "from-indigo-500 to-purple-600",
+            "image": "",
+            "type": "course",
+            "sections": [
+              {
+                "id": "s1",
+                "name": "التكامل Ch1",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "l1",
+                    "name": "Ch1 P1",
+                    "url": "https://youtu.be/RUk95eJ8Plw?si=yg6AyUazfN9cUpbM"
+                  },
+                  {
+                    "id": "l2",
+                    "name": "Ch1 P2",
+                    "url": "https://youtu.be/6uG9k8wlOrA?si=piqru17D5qBFzlQ9"
+                  },
+                  {
+                    "id": "l3",
+                    "name": "Ch1 P3",
+                    "url": "https://youtu.be/h0EZCN25Sak?si=yMWB_4igllPhS57l"
+                  },
+                  {
+                    "id": "l4",
+                    "name": "Ch1 p4",
+                    "url": "https://youtu.be/-ezqYc6djBw?si=v5x3ew9hiVRWYszv"
+                  }
+                ]
+              },
+              {
+                "id": "s2",
+                "name": "التكامل Ch2",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "l5",
+                    "name": "Ch2 P1",
+                    "url": "https://youtu.be/nSfcPUVTbk8?si=d1KkNvGA0xda0Y0z"
+                  },
+                  {
+                    "id": "l6",
+                    "name": "Ch2 P2",
+                    "url": "https://youtu.be/O9gb6uGmTtg?si=tJXs1zQgjcioGqwC"
+                  },
+                  {
+                    "id": "l7",
+                    "name": "Ch2 P3",
+                    "url": "https://youtu.be/y3aqHpdVQUQ?si=GvLZOtEQQl4R5HFX"
+                  },
+                  {
+                    "id": "l8",
+                    "name": "Ch2 P4",
+                    "url": "https://youtu.be/7A-41Alxu0c?si=162ymCbKT8V2glOk"
+                  },
+                  {
+                    "id": "l9",
+                    "name": "Ch2 P5",
+                    "url": "https://youtu.be/oeuLRftb93k?si=EQLPYcoaUnt08QqN"
+                  },
+                  {
+                    "id": "l10",
+                    "name": "Ch2 P6",
+                    "url": "https://youtu.be/F0trVVlaEgY?si=w229jpH8w7zzeGj_"
+                  }
+                ]
+              },
+              {
+                "id": "s3",
+                "name": "التكامل Ch3",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "l11",
+                    "name": "Ch3 P1",
+                    "url": "https://youtu.be/Cuhu79alv6c?si=p7L_bqXOTUbb1O7J"
+                  },
+                  {
+                    "id": "l12",
+                    "name": "Ch3 P2",
+                    "url": "https://youtu.be/MSTO6PsTPMQ?si=mRZO0MeajohtaW31"
+                  },
+                  {
+                    "id": "l13",
+                    "name": "Ch3 Rev",
+                    "url": "https://youtu.be/NutJ4aEtEjk?si=5DEGbBsU70dsbaX0"
+                  }
+                ]
+              },
+              {
+                "id": "s4",
+                "name": "التكامل Ch4",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "l14",
+                    "name": "Ch4 P1",
+                    "url": "https://youtu.be/KbgRloxlC38?si=LT3QLUHw1ajbmv43"
+                  },
+                  {
+                    "id": "l15",
+                    "name": "Ch4 P2",
+                    "url": "https://youtu.be/DjL4ugazGj8?si=8I9y7QgPNYTM4WNm"
+                  }
+                ]
+              },
+              {
+                "id": "s5",
+                "name": "التكامل Ch5",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "l16",
+                    "name": "Ch5 P1",
+                    "url": "https://youtu.be/XYMLrR-n7rI?si=6_DY3ecOySDlnZu5"
+                  },
+                  {
+                    "id": "l17",
+                    "name": "Ch5 P2",
+                    "url": "https://youtu.be/E-OJMafTKYM?si=s2VrO3Epftq8Gk4p"
+                  },
+                  {
+                    "id": "l18",
+                    "name": "Ch5 P3",
+                    "url": "https://youtu.be/cNSSLe8rdzk?si=inXC9jTAkTWDWS8t"
+                  }
+                ]
+              },
+              {
+                "id": "s6",
+                "name": "مراجعه سريعه على التكامل",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "l19",
+                    "name": "دا لينك فيديو دكتور رضا (١٠دقايق ال لخص فيهم التكامل)",
+                    "url": "https://youtu.be/2ThGgZEHT6Q?si=r8w-QjNBHay-PoBJ"
+                  }
+                ]
+              },
+              {
+                "id": "s7",
+                "name": "مراجعه على التكامل",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "l20",
+                    "name": "Review",
+                    "url": "https://youtu.be/l4HmJ1RxaVE?si=rbCMu3bKjxCWm3IE"
+                  }
+                ]
+              },
+              {
+                "id": "s8",
+                "name": "هندسة تحليلية Ch1",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "l21",
+                    "name": "Ch1 P1",
+                    "url": "https://youtu.be/81l8X4zqVaA?si=m4vZekgjeeeQ6v3H"
+                  },
+                  {
+                    "id": "l22",
+                    "name": "Ch1 P2",
+                    "url": "https://youtu.be/HJA2-HcQbwI?si=GAoni4BfOrEohqz5"
+                  },
+                  {
+                    "id": "l23",
+                    "name": "Ch1 P3",
+                    "url": "https://youtu.be/xxNfMtQdwhg?si=f-Ltb7xrJ3XUmHBq"
+                  },
+                  {
+                    "id": "l24",
+                    "name": "Ch1 P4",
+                    "url": "https://youtu.be/KvNIgrO5PtQ?si=Pahws2jcFzxLHSCd"
+                  },
+                  {
+                    "id": "l25",
+                    "name": "Ch1 P5",
+                    "url": "https://youtu.be/ylLeby9kb9I?si=9r7zEz3vGTbdXv16"
+                  },
+                  {
+                    "id": "l26",
+                    "name": "Ch1 P6",
+                    "url": "https://youtu.be/E8I2-lPBF00?si=ea6izTEMe1F5-hlg"
+                  },
+                  {
+                    "id": "l27",
+                    "name": "Ch1 P7",
+                    "url": "https://youtu.be/iIwUeb_pIrQ?si=DTV_j-WseQVtTY04"
+                  },
+                  {
+                    "id": "l28",
+                    "name": "Ch1 P8",
+                    "url": "https://youtu.be/uTFZHIKkWHE?si=wgNFmmz3WUc_9cop"
+                  },
+                  {
+                    "id": "l29",
+                    "name": "Ch1 P9",
+                    "url": "https://youtu.be/QGnZEc3sQrI?si=KjTXn4W4bonPlBaM"
+                  },
+                  {
+                    "id": "l30",
+                    "name": "Ch1 P10",
+                    "url": "https://youtu.be/8HFALBaWoXU?si=ahijN-Be4thwMk4g"
+                  }
+                ]
+              },
+              {
+                "id": "s9",
+                "name": "هندسة تحليلية Ch2",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "l31",
+                    "name": "Ch2",
+                    "url": "https://youtu.be/U0MfBAivVkE?si=uHCeIr_OzNmKS9Me"
+                  }
+                ]
+              },
+              {
+                "id": "s10",
+                "name": "هندسة تحليلية Ch3",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "l32",
+                    "name": "Ch3 P1 A",
+                    "url": "https://youtu.be/iANaxzWVBb4?si=Aad8N-joymU9VtjW"
+                  },
+                  {
+                    "id": "l33",
+                    "name": "Ch3 P1 B",
+                    "url": "https://youtu.be/jQummo3ejyY?si=O5mEflIyPbusFAjI"
+                  },
+                  {
+                    "id": "l34",
+                    "name": "Ch3 Section 1",
+                    "url": "https://youtu.be/Ieffs8oDJUI?si=EZJaR5heiUCtow41"
+                  },
+                  {
+                    "id": "l35",
+                    "name": "Ch3 P2 A",
+                    "url": "https://youtu.be/s463gKKP7Iw?si=wIeRDc1zYkITKcwV"
+                  },
+                  {
+                    "id": "l36",
+                    "name": "Ch3 P2 B",
+                    "url": "https://youtu.be/RVzPlviYsZ4?si=vQWE80mCO_-UpdJv"
+                  },
+                  {
+                    "id": "l37",
+                    "name": "Ch3 Section2",
+                    "url": "https://youtu.be/ynnSZjNyBzk?si=2gn-wKP639ooXqFE"
+                  },
+                  {
+                    "id": "l38",
+                    "name": "Ch3 P3 A",
+                    "url": "https://youtu.be/dj_jI0uMLvg?si=89BE_YmNIzoaVNXj"
+                  },
+                  {
+                    "id": "l39",
+                    "name": "Ch3 P3 B",
+                    "url": "https://youtu.be/I2i3At0QzvA?si=Jirvhh13RNVFurm1"
+                  }
+                ]
+              },
+              {
+                "id": "s11",
+                "name": "بلاي ليست سكاشن",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "l40",
+                    "name": "بشمهندس اكرم",
+                    "url": "https://youtube.com/playlist?list=PLLa-YTRWOBRxiLrCqvUvIiCBS4O011pFy&si=SFGQdejpzIAFhaUx"
+                  }
+                ]
+              },
+              {
+                "id": "s12",
+                "name": "درايف المادة",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "l41",
+                    "name": "اضغط هنا",
+                    "url": "https://drive.google.com/drive/folders/1i3M1OyHquCjVOVeCsyn1gTd6X_jhaNZk"
+                  }
+                ]
+              }
+            ],
+            "notes": [
+              {
+                "id": 1773922984701,
+                "content": "الميدتيرم على شابتر ١ و ٢ و شابتر ٣ اول فيديوهين بس دا في التكامل \nالتحليلية معانا ال Parabola_ellipse_circle",
+                "createdAt": "2026-03-19T12:23:04.701Z",
+                "updatedAt": "2026-03-19T12:24:23.229Z"
+              }
+            ]
+          },
+          {
+            "id": "course-physics2",
+            "title": "Physics 2",
+            "doc": "Dr/Marwa , Dr/EL-azab , Dr/Hany",
+            "icon": "fa-atom",
+            "color": "from-cyan-500 to-blue-600",
+            "image": "",
+            "type": "course",
+            "sections": [
+              {
+                "id": "p1",
+                "name": "فيزياء كهربيه Chapter 1",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "pl1",
+                    "name": "بلاي ليست Chapter 1 د/محمد اسماعيل",
+                    "url": "https://youtube.com/playlist?list=PLD30uL4tqplGqcEvIb_lQkguEFvQ2XZKe&si=raQgBFXK6L3IzfON"
+                  },
+                  {
+                    "id": "pl2",
+                    "name": "Ch1 P1 د/مروة",
+                    "url": "https://drive.google.com/file/d/170SyidffEaUtyrNza8eptji2vWH7Llsb/view?usp=sharing"
+                  },
+                  {
+                    "id": "pl3",
+                    "name": "Ch1 P2 د/مروة",
+                    "url": "https://drive.google.com/file/d/1TVIl7jBcdbN1MXzomuuhoI9d0r_oS2Pt/view?usp=sharing"
+                  },
+                  {
+                    "id": "pl4",
+                    "name": "Chapter 1 د/العزب",
+                    "url": "https://youtu.be/eLh1XlKZ2u0?si=Q_0CQhF_R5wnSPLC"
+                  },
+                  {
+                    "id": "pl5",
+                    "name": "Chapter 1 د/كمال عابدين",
+                    "url": "https://youtu.be/P_y4yY13Lh0?si=1iaT8lWoB6OGyMHp"
+                  }
+                ]
+              },
+              {
+                "id": "p2",
+                "name": "فيزياء كهربيه Chapter 2",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "pl6",
+                    "name": "بلاي ليست Chapter 2 د/محمد اسماعيل",
+                    "url": "https://youtube.com/playlist?list=PLD30uL4tqplH5Lyg6V2VCZCs_CaEdXWA9&si=OKkDr5KaNHyrSrq8"
+                  },
+                  {
+                    "id": "pl7",
+                    "name": "Ch2 P1 د/مروة",
+                    "url": "https://drive.google.com/file/d/1idJx4qc6ZaRRzq3ZX2o8VvOMoyxPm1Hb/view?usp=drive_link"
+                  },
+                  {
+                    "id": "pl8",
+                    "name": "Ch2 P2 د/مروة",
+                    "url": "https://drive.google.com/file/d/1WvB3Kf4UduyHnaUbsmFay0B_ttqvQSmR/view?usp=sharing"
+                  },
+                  {
+                    "id": "pl9",
+                    "name": "Chapter 2 د/العزب",
+                    "url": "https://youtu.be/PV6QRNmhNhc?si=w1Aii_-KW4_zjNjT"
+                  },
+                  {
+                    "id": "pl10",
+                    "name": "Chapter 2 د/كمال عابدين",
+                    "url": "https://youtu.be/SYL1ysAJun4?si=1UZcf-TKYSj1PPOz"
+                  }
+                ]
+              },
+              {
+                "id": "p3",
+                "name": "فيزياء كهربيه Chapter 3",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "pl11",
+                    "name": "بلاي ليست Chapter 3 د/محمد اسماعيل",
+                    "url": "https://www.youtube.com/playlist?list=PLD30uL4tqplGpCUoUkZY6oPz7h_HnfuGB"
+                  },
+                  {
+                    "id": "pl12",
+                    "name": "Ch 3 د/مروة",
+                    "url": "https://drive.google.com/file/d/1Jg0RA2OoTW3bwIu08EbsTyzdlnRJf0O3/view"
+                  },
+                  {
+                    "id": "pl13",
+                    "name": "Chapter 3 د/العزب",
+                    "url": "https://youtu.be/BBI_22z6et0?si=cT4wiQNOLxbsMp2M"
+                  },
+                  {
+                    "id": "pl14",
+                    "name": "Chapter 3 د/كمال عابدين",
+                    "url": "https://youtu.be/5myPT_PFfxw?si=PzXIw9YcRshipwz0"
+                  }
+                ]
+              },
+              {
+                "id": "p4",
+                "name": "فيزياء كهربيه Chapter 4",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "pl15",
+                    "name": "بلاي ليست Chapter 4 د/محمد اسماعيل",
+                    "url": "https://www.youtube.com/playlist?list=PLD30uL4tqplETtebIz-ZKd7OYx6qPGReW"
+                  },
+                  {
+                    "id": "pl16",
+                    "name": "Ch4 P1 د/مروة",
+                    "url": "https://drive.google.com/file/d/1Gqk5S-JSf38rv4myIOKYB4LEfFhFl1dc/view"
+                  },
+                  {
+                    "id": "pl17",
+                    "name": "Ch4 P2 د/مروة",
+                    "url": "https://drive.google.com/file/d/1ZgrJDy-T7cCCaUoVmICQ3TaFeZ9qmh2u/view"
+                  },
+                  {
+                    "id": "pl18",
+                    "name": "Chapter 4 د/العزب",
+                    "url": "https://youtu.be/v1Jexw3pOVE?si=sJaI4z8o8PTIa4dK"
+                  },
+                  {
+                    "id": "pl19",
+                    "name": "Chapter 4 د/كمال عابدين",
+                    "url": "https://youtu.be/PtxskNPKZiE?si=Ga5q0DsU3SfuYFUB"
+                  }
+                ]
+              },
+              {
+                "id": "p5",
+                "name": "مراجعة الكهربية",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "pl20",
+                    "name": "Review د/مروة",
+                    "url": "https://drive.google.com/file/d/1rFOsRLJadH9Y7msOEpjB5daaBsktV1uf/view?usp=sharing"
+                  }
+                ]
+              },
+              {
+                "id": "p6",
+                "name": "فيزياء ضوئية Chapter 1",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "pl21",
+                    "name": "Chapter 1 م/محمد ناجي",
+                    "url": "https://youtu.be/lQnbhu8Efjw?si=ZQf98PkjhVPjG28g"
+                  },
+                  {
+                    "id": "pl22",
+                    "name": "Ch1 د/مروة",
+                    "url": "https://drive.google.com/file/d/18x_x7AIp9v0jqLTHFnMjQvO010Uq1Oy3/view"
+                  },
+                  {
+                    "id": "pl23",
+                    "name": "Ch1 د/كمال عابدين",
+                    "url": "https://youtu.be/hzg-aVFD5p4?si=CeAbcB1NdVNLCH7Q"
+                  },
+                  {
+                    "id": "pl24",
+                    "name": "Ch1 د/محمد فرحات",
+                    "url": "https://youtu.be/uao-bJJ6-0g?si=yLUpYXGhYpM08WXE"
+                  }
+                ]
+              },
+              {
+                "id": "p7",
+                "name": "فيزياء ضوئية Chapter 2",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "pl25",
+                    "name": "Chapter 2 م/محمد ناجي",
+                    "url": "https://youtu.be/Sh7Co_VTCpo?si=u9onfabEA47VtGcL"
+                  },
+                  {
+                    "id": "pl26",
+                    "name": "Ch 2 د/مروة",
+                    "url": "https://drive.google.com/file/d/1C7kJOpV0SUKPKA80lTzNWjsu01jeWDNs/view"
+                  },
+                  {
+                    "id": "pl27",
+                    "name": "Ch2 د/العزب",
+                    "url": "https://youtu.be/NCpCI82aOXE?si=eCj0fsaATyr_4_Pn"
+                  }
+                ]
+              },
+              {
+                "id": "p8",
+                "name": "فيزياء ضوئية Chapter 3",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "pl28",
+                    "name": "Chapter3 د/محمد اسماعيل",
+                    "url": "https://youtu.be/F-mCZPaxrKc?si=IuK2OKlpsXzWsXfU"
+                  },
+                  {
+                    "id": "pl29",
+                    "name": "Ch 3 د/مروة",
+                    "url": "https://drive.google.com/file/d/1Eb3IWfJNZx4WJ1yBZBpw5DcqOS49lEan/view"
+                  },
+                  {
+                    "id": "pl30",
+                    "name": "Ch3 P1 د/هاني",
+                    "url": "https://youtu.be/Gd3gJDx7GvY?si=lxZcTkTXTIPK83YN"
+                  },
+                  {
+                    "id": "pl31",
+                    "name": "Ch3 P2 د/هاني",
+                    "url": "https://youtu.be/WM_DKHAwGuU?si=l3RIJNIjbRYGn8Cb"
+                  },
+                  {
+                    "id": "pl32",
+                    "name": "Ch3 P1 د/عابد",
+                    "url": "https://youtu.be/CFLHTeAh4HU?si=ZkkieNVAugtDUKoZ"
+                  },
+                  {
+                    "id": "pl33",
+                    "name": "Ch3 P2 د/عابد",
+                    "url": "https://youtu.be/J7_s36GFERU?si=1Y0bgyGc9jAkVGWl"
+                  },
+                  {
+                    "id": "pl34",
+                    "name": "Ch3 P1 د/محمد فرحات",
+                    "url": "https://youtu.be/3b969zGCk-Q?si=9pJ0kdq8vTo9_raf"
+                  },
+                  {
+                    "id": "pl35",
+                    "name": "Ch3 P2 د/محمد فرحات",
+                    "url": "https://youtu.be/tgVGa_gkj20?si=tyV3L5nkk5Ob_JTz"
+                  },
+                  {
+                    "id": "pl36",
+                    "name": "Ch3 P3 د/محمد فرحات",
+                    "url": "https://youtu.be/YgYPgGWFz0w?si=I5nNu3JHNwQ4Uq0N"
+                  },
+                  {
+                    "id": "pl37",
+                    "name": "Ch3 P4 د/محمد فرحات",
+                    "url": "https://youtu.be/W7zQc9Nuqi0?si=F1riuIEpG6kGE1Lm"
+                  }
+                ]
+              },
+              {
+                "id": "p9",
+                "name": "فيزياء ضوئية Chapter 4",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "pl38",
+                    "name": "Chapter 4 د/محمد اسماعيل",
+                    "url": "https://youtu.be/MowPj7PBz7o?si=8NHBoizm3lax7Kft"
+                  },
+                  {
+                    "id": "pl39",
+                    "name": "Ch4 P1 د/مروة",
+                    "url": "https://drive.google.com/file/d/1ZzD5izHVo-C7fbH_TqIouBqnfv6llybc/view?usp=sharing"
+                  },
+                  {
+                    "id": "pl40",
+                    "name": "Ch4 P2 د/مروة",
+                    "url": "https://drive.google.com/file/d/1_7eworjskAJmTEcRbiIPv9Nblonl5OeJ/view?usp=drive_link"
+                  },
+                  {
+                    "id": "pl41",
+                    "name": "Ch4 د/هاني",
+                    "url": "https://youtu.be/4Sk3870qpJU?si=GXCvJ1QUOxlpzA3Q"
+                  },
+                  {
+                    "id": "pl42",
+                    "name": "Ch4 د/محمد فرحات",
+                    "url": "https://youtu.be/3tzOfa3eeDA?si=O_GjqiGSAZ2Fz_iE"
+                  }
+                ]
+              },
+              {
+                "id": "p10",
+                "name": "مراجعة الضوئية",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "pl43",
+                    "name": "Review د/مروة",
+                    "url": "https://drive.google.com/file/d/1rHW3bRBFP_X_gmNfUBK_1U3h3wRUxxMV/view?usp=sharing"
+                  }
+                ]
+              },
+              {
+                "id": "p11",
+                "name": "تجارب عمليه",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "pl44",
+                    "name": "1- قانون اووم",
+                    "url": "https://drive.google.com/file/d/1oN2JY6QISkwlwlQptRvoD9Wyd9jzKyal/view?usp=sharing"
+                  },
+                  {
+                    "id": "pl45",
+                    "name": "2- الشحن الاستاتيكي",
+                    "url": "https://drive.google.com/file/d/1PVFPZSHMWkW_QVxhpujyItIkdw-xLt-K/view?usp=drivesdk"
+                  },
+                  {
+                    "id": "pl46",
+                    "name": "3- تجربة تعيين معامل انكسار منشور زجاجي",
+                    "url": "https://youtu.be/TY7_n5wQ0ow?si=PvZ6zgKTT1Tgztqv"
+                  },
+                  {
+                    "id": "pl47",
+                    "name": "4- الاستقطاب",
+                    "url": "https://drive.google.com/file/d/1a0xyfhmnk0DrHgiT1ASB0C7W7g2fIFfX/view?usp=drivesdk"
+                  }
+                ]
+              },
+              {
+                "id": "p12",
+                "name": "درايف المادة",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "pl48",
+                    "name": "اضغط هنا",
+                    "url": "https://drive.google.com/drive/folders/1GFTjGVWGfIQ29N_1sqFnUavzok6CQjmf"
+                  }
+                ]
+              }
+            ],
+            "notes": [
+              {
+                "id": 1773374241142,
+                "content": "البلاي ليست بتاعت الاربع شباتر بتوع الكهربيه بتاعت د/محمد اسماعيل اتفرج على اول ١٠ فيديوهات بس منهم ما عدا شابتر ٢ اول ٨ بس .",
+                "createdAt": "2026-03-13T03:57:21.142Z"
+              },
+              {
+                "id": 1773917531713,
+                "content": "الميدتيرم على ٣ شباتر ضوئية واول شابتر كهربية",
+                "createdAt": "2026-03-19T10:52:11.713Z"
+              }
+            ]
+          },
+          {
+            "id": "course-mechanics2",
+            "title": "Mechanics 2",
+            "doc": "Dr/Walid , Dr/Hanafy , Dr/Barakat",
+            "icon": "fa-cogs",
+            "color": "from-orange-500 to-red-500",
+            "image": "",
+            "type": "course",
+            "sections": [
+              {
+                "id": "m1",
+                "name": "Ch1 Frame",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "ml1",
+                    "name": "شرح د / رضا عبده",
+                    "url": "https://youtu.be/knAzMUiDJRY?si=3wnm5bwrrB6cUVvD"
+                  },
+                  {
+                    "id": "ml2",
+                    "name": "شرح د / احمد ذكي",
+                    "url": "https://youtu.be/WHrQX53ePwg?si=ha5HI_7R5skZoOrL"
+                  },
+                  {
+                    "id": "ml3",
+                    "name": "شرح د/حسين السيد",
+                    "url": "https://youtu.be/EiVjduNotVs?si=DyijVCySaBMfB_xF"
+                  }
+                ]
+              },
+              {
+                "id": "m2",
+                "name": "Ch2 Centroid",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "ml4",
+                    "name": "Part 1 د/ رضا عبده",
+                    "url": "https://youtu.be/M8X7l1JpODY?si=lb8CNiFODuEVKobZ"
+                  },
+                  {
+                    "id": "ml5",
+                    "name": "Part 2 د/ رضا عبده",
+                    "url": "https://youtu.be/oCjmBuhz9j0?si=C9ZXsZ_Jb2IQrTE4"
+                  },
+                  {
+                    "id": "ml6",
+                    "name": "Part 3 د/ رضا عبده",
+                    "url": "https://youtu.be/shQ3i7lSdwo?si=1C5bziUcho60kJZB"
+                  },
+                  {
+                    "id": "ml7",
+                    "name": "Part 4 د/ رضا عبده",
+                    "url": "https://youtu.be/bnndEDsuWgE?si=t-XjQc2cIS1MWCfZ"
+                  },
+                  {
+                    "id": "ml8",
+                    "name": "Part 1 د/ وليد البشبيشي",
+                    "url": "https://youtu.be/J9OmPbcNK4I?si=5DQH3lKka6BcUpg0"
+                  },
+                  {
+                    "id": "ml9",
+                    "name": "Part 2 د/ وليد البشبيشي",
+                    "url": "https://youtu.be/dfYm_fdnXQ4?si=e1BV7QNorkpkjdYU"
+                  },
+                  {
+                    "id": "ml10",
+                    "name": "د/ احمد ذكي",
+                    "url": "https://youtu.be/vZxpRUWU-kE?si=8T6NddxQNH5e1gBE"
+                  },
+                  {
+                    "id": "ml11",
+                    "name": "د/حسين السيد",
+                    "url": "https://youtu.be/fVStm-4Bufg?si=l8I3QXRzTLb_wKC-"
+                  }
+                ]
+              },
+              {
+                "id": "m3",
+                "name": "Ch3 distribution force",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "ml12",
+                    "name": "The first lecture د/وليد البشبيشي",
+                    "url": "https://youtu.be/bKpYEV-T6cQ?si=Ceu52ryuEIMmxGXZ"
+                  },
+                  {
+                    "id": "ml13",
+                    "name": "The first section",
+                    "url": "https://youtu.be/u3yiIKxLJTs?si=4adVlu2ogxoszX0Q"
+                  },
+                  {
+                    "id": "ml14",
+                    "name": "The second lecture د/وليد البشبيشي",
+                    "url": "https://youtu.be/lbP2reG7t8M?si=SUathA8Rp9dq7H4k"
+                  },
+                  {
+                    "id": "ml15",
+                    "name": "The second section",
+                    "url": "https://youtu.be/nVPk7QRV8go?si=xl1ZgX5097oHDWQT"
+                  },
+                  {
+                    "id": "ml16",
+                    "name": "جامعة المنصورة",
+                    "url": "https://www.youtube.com/watch?v=xAH-45mcJSg"
+                  }
+                ]
+              },
+              {
+                "id": "m4",
+                "name": "Ch4 Fraction",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "ml17",
+                    "name": "Part1 د/وليد البشبيشي",
+                    "url": "https://youtu.be/3o6tm9QmC0c?si=8s_umcCIVdXXQ-g7"
+                  },
+                  {
+                    "id": "ml18",
+                    "name": "section on part 1",
+                    "url": "https://youtu.be/5XOwlX_q4vk?si=SX2dJvQLBwLxmLdM"
+                  },
+                  {
+                    "id": "ml19",
+                    "name": "Part 2 a د/وليد البشبيشي",
+                    "url": "https://youtu.be/PkXOC6xoXhA?si=HWqtIPGCahDaj5DJ"
+                  },
+                  {
+                    "id": "ml20",
+                    "name": "Part2 b د/وليد البشبيشي",
+                    "url": "https://youtu.be/yW1B6C71eZE?si=qKg87t2_PZkoWnCz"
+                  },
+                  {
+                    "id": "ml21",
+                    "name": "د/السيد بركات",
+                    "url": "https://drive.google.com/file/d/1PzaCM1agmWH3r6dfXNxJ1r3_8J6kOzJW/view?usp=drivesdk"
+                  },
+                  {
+                    "id": "ml22",
+                    "name": "د/احمد ذكي",
+                    "url": "https://youtu.be/u39WkCWyzWE?si=XkPKylturVuZPgGZ"
+                  },
+                  {
+                    "id": "ml23",
+                    "name": "Wedges P1",
+                    "url": "https://youtu.be/kn1P3GIX1aE?si=SZnPnht4OorjJ-MB"
+                  },
+                  {
+                    "id": "ml24",
+                    "name": "Wedges P2",
+                    "url": "https://youtu.be/ueDcMveCgGA?si=LjcUs7Sdrhap7uCa"
+                  },
+                  {
+                    "id": "ml25",
+                    "name": "Wedges P3",
+                    "url": "https://youtu.be/iZsB0CXg-rk?si=d-U06o6E6E3HaGk4"
+                  },
+                  {
+                    "id": "ml26",
+                    "name": "Screws P1",
+                    "url": "https://youtu.be/-AaiZkOdobA?si=eWwqutBwLXhrsHRL"
+                  },
+                  {
+                    "id": "ml27",
+                    "name": "Screws P2",
+                    "url": "https://youtu.be/iOtmfRqXNyc?si=hU6KD9t5UGkDaAMk"
+                  }
+                ]
+              },
+              {
+                "id": "m5",
+                "name": "Ch5 ديناميكا",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "ml28",
+                    "name": "من البدايه + الاحداثيات الكارتيزية",
+                    "url": "https://youtu.be/lNYt_fktVPw?si=SAxxOzKKtt7crIKI"
+                  },
+                  {
+                    "id": "ml29",
+                    "name": "tangent and normal",
+                    "url": "https://youtu.be/3CaO83ZfbAU?si=Lb8ibRVrCGzQFev0"
+                  },
+                  {
+                    "id": "ml30",
+                    "name": "Polar Coordinates",
+                    "url": "https://youtu.be/6SLV4XTNmyQ?si=r7Mm_0IZlTjMedRN"
+                  },
+                  {
+                    "id": "ml31",
+                    "name": "Curvilinear motion Projectiles د/احمد ذكي",
+                    "url": "https://www.youtube.com/watch?v=CY9fzWxKOU0"
+                  },
+                  {
+                    "id": "ml32",
+                    "name": "شرح د/حسين السيد",
+                    "url": "https://www.youtube.com/watch?v=Ycd_jw_xHWw"
+                  }
+                ]
+              },
+              {
+                "id": "m6",
+                "name": "درايف المادة",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "ml33",
+                    "name": "اضغط هنا",
+                    "url": "https://drive.google.com/drive/folders/1ZIz34nBePIKcNAfk6-JEeItVoL8wCstF"
+                  }
+                ]
+              }
+            ],
+            "notes": [
+              {
+                "id": 1773917491339,
+                "content": "الميدتيرم على اول ٣ شباتر",
+                "createdAt": "2026-03-19T10:51:31.339Z"
+              }
+            ]
+          },
+          {
+            "id": "course-drawing",
+            "title": "Engineering Drawing",
+            "doc": "Dr/Shbara , Dr/Tawakol , Dr/El-eraky",
+            "icon": "fa-drafting-compass",
+            "color": "from-emerald-500 to-teal-600",
+            "image": "",
+            "type": "course",
+            "sections": [
+              {
+                "id": "d1",
+                "name": "بلاي ليست محاضارات د.توكل",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "dl1",
+                    "name": "د.توكل",
+                    "url": "https://youtube.com/playlist?list=PLjtgayhnDHtwCTTjb3c5YIYlNAglOLxgi&si=aHnMk4c5wj7Byygx"
+                  }
+                ]
+              },
+              {
+                "id": "d2",
+                "name": "بلاي ليست محاضرات د.محمد الأشهب",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "dl2",
+                    "name": "د.محمد الأشهب",
+                    "url": "https://youtube.com/playlist?list=PL8eBCmLQBwYvMru-1kmuOXxb-8Bz_UYQn&si=WpMdjOcpvdvRuX0H"
+                  }
+                ]
+              },
+              {
+                "id": "d3",
+                "name": "بلاي ليست سكاشن",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "dl3",
+                    "name": "بشمهندس فوزي",
+                    "url": "https://www.youtube.com/@EngineeringDrawing9/playlists"
+                  }
+                ]
+              },
+              {
+                "id": "d4",
+                "name": "مراجعة الميدتيرم",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "dl4",
+                    "name": "part 1",
+                    "url": "https://youtu.be/LgEn3Twffg0?si=wsPCAFYXMnShcx3z"
+                  }
+                ]
+              },
+              {
+                "id": "d5",
+                "name": "درايف المادة",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "dl5",
+                    "name": "اضغط هنا",
+                    "url": "https://drive.google.com/drive/folders/1XXP8xNj3Z4SGc1hCCrPhAbg22HVShx8z"
+                  }
+                ]
+              }
+            ],
+            "notes": [
+              {
+                "id": 1773917593371,
+                "content": "الميدتيرم لحد المساقط فقط \n(mcq,مساقط و مماسات)",
+                "createdAt": "2026-03-19T10:53:13.371Z"
+              }
+            ]
+          },
+          {
+            "id": "course-production",
+            "title": "Production",
+            "doc": "Dr/Ossama Abouelatta , Dr/Magdy , Dr/Mohamed keran",
+            "icon": "fa-industry",
+            "color": "from-violet-500 to-purple-700",
+            "image": "",
+            "type": "course",
+            "sections": [
+              {
+                "id": "pr1",
+                "name": "بلاي ليست محاضرات د/اسامه",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "prl1",
+                    "name": "اضغط للفتح",
+                    "url": "https://youtube.com/playlist?list=PLlzDSScHK9w75WdBXRAJZ1iMpTepshWEw&si=V2p8nZBqyArYLYI2"
+                  }
+                ]
+              },
+              {
+                "id": "pr2",
+                "name": "ورش انتاج",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "prl2",
+                    "name": "ورشة لحام",
+                    "url": "https://youtu.be/yJQJP1gILuo?si=whEeDXs2IrLAMssy"
+                  },
+                  {
+                    "id": "prl3",
+                    "name": "ورشة صاج",
+                    "url": "https://youtu.be/cwGvDr6E8ag?si=7sjk2y_FPuwHpHdX"
+                  },
+                  {
+                    "id": "prl4",
+                    "name": "ورشة نماذج",
+                    "url": "https://youtu.be/emz--dLHjF4?si=wkqMREkBuqvKXVxw"
+                  },
+                  {
+                    "id": "prl5",
+                    "name": "ورشة كهرباء",
+                    "url": "https://youtu.be/8OxtPybsgDQ?si=Rj8X64mBZaWNbwLo"
+                  },
+                  {
+                    "id": "prl6",
+                    "name": "ورشة برادة",
+                    "url": "https://youtu.be/wdr2gwLBnpY?si=7YNN_gB1sBZgeg8X"
+                  },
+                  {
+                    "id": "prl7",
+                    "name": "ورشة سباكة",
+                    "url": "https://youtu.be/TAPbLj8zZ6I?si=i13jC8Uh6e1utKHz"
+                  },
+                  {
+                    "id": "prl8",
+                    "name": "ورشة الحدادة",
+                    "url": "https://youtu.be/sxtxA9Bn3Iw?si=XPRjOSzWykZ6uFpK"
+                  },
+                  {
+                    "id": "prl9",
+                    "name": "ورشة الماكينات",
+                    "url": "https://youtu.be/wthgXmqjrt4?si=q7GwFDYMp74-K8M"
+                  }
+                ]
+              }
+            ],
+            "notes": []
+          },
+          {
+            "id": "course-cprog",
+            "title": "Programming with C",
+            "doc": "Dr/Ahmed Saleh , Dr/Mahmoud Saafan, Dr/Hanaa, Dr/Eman",
+            "icon": "fa-code",
+            "color": "from-sky-500 to-indigo-600",
+            "image": "",
+            "type": "course",
+            "sections": [
+              {
+                "id": "c1",
+                "name": "شرح د / احمد صالح",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "cl1",
+                    "name": "Source",
+                    "url": "https://medmansedu-my.sharepoint.com/personal/magedy_std_mans_edu_eg/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fmagedy%5Fstd%5Fmans%5Fedu%5Feg%2FDocuments%2F%D9%85%D8%AD%D8%A7%D8%B6%D8%B1%D8%A7%D8%AA%20%D8%A7%D8%B9%D8%AF%D8%A7%D8%AF%D9%8A%20%D8%A7%D9%84%D8%AA%D8%B1%D9%85%20%D8%A7%D9%84%D8%AB%D8%A7%D9%86%D9%8A%2F%D8%A8%D8%B1%D9%85%D8%AC%D9%85%D8%A9%D8%8C%20%D8%A3%D8%AD%D9%85%D8%AF%20%D8%B5%D8%A7%D9%84%D8%AD"
+                  },
+                  {
+                    "id": "cl2",
+                    "name": "Lecture 1",
+                    "url": "https://drive.google.com/drive/folders/1DwHhkMiJ5KZ07yrgY2HSv09MOBOxPAax"
+                  },
+                  {
+                    "id": "cl3",
+                    "name": "Lecture 2",
+                    "url": "https://medmansedu-my.sharepoint.com/personal/magedy_std_mans_edu_eg/_layouts/15/stream.aspx"
+                  },
+                  {
+                    "id": "cl4",
+                    "name": "Lecture 3",
+                    "url": "https://medmansedu-my.sharepoint.com/personal/magedy_std_mans_edu_eg/_layouts/15/stream.aspx"
+                  },
+                  {
+                    "id": "cl5",
+                    "name": "Lecture 4",
+                    "url": "https://medmansedu-my.sharepoint.com/personal/magedy_std_mans_edu_eg/_layouts/15/stream.aspx"
+                  },
+                  {
+                    "id": "cl6",
+                    "name": "Lecture 5",
+                    "url": "https://medmansedu-my.sharepoint.com/personal/magedy_std_mans_edu_eg/_layouts/15/stream.aspx"
+                  },
+                  {
+                    "id": "cl7",
+                    "name": "Lecture 6",
+                    "url": "https://medmansedu-my.sharepoint.com/personal/magedy_std_mans_edu_eg/_layouts/15/stream.aspx"
+                  },
+                  {
+                    "id": "cl8",
+                    "name": "Lecture 7",
+                    "url": "https://medmansedu-my.sharepoint.com/personal/magedy_std_mans_edu_eg/_layouts/15/stream.aspx"
+                  },
+                  {
+                    "id": "cl9",
+                    "name": "Lecture 8",
+                    "url": "https://medmansedu-my.sharepoint.com/personal/magedy_std_mans_edu_eg/_layouts/15/stream.aspx"
+                  },
+                  {
+                    "id": "cl10",
+                    "name": "Lecture 9",
+                    "url": "https://medmansedu-my.sharepoint.com/personal/magedy_std_mans_edu_eg/_layouts/15/stream.aspx"
+                  },
+                  {
+                    "id": "cl11",
+                    "name": "Lecture 10",
+                    "url": "https://medmansedu-my.sharepoint.com/personal/magedy_std_mans_edu_eg/_layouts/15/stream.aspx"
+                  }
+                ]
+              },
+              {
+                "id": "c2",
+                "name": "شرح د / محمود سعفان",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "cl12",
+                    "name": "اضغط للفتح",
+                    "url": "https://youtube.com/playlist?list=PLqhlDoXCm-cgptnBxMpiHfRI_CsNCDf45&si=Vc26kvrUNN_APwwx"
+                  }
+                ]
+              },
+              {
+                "id": "c3",
+                "name": "فولدر سكاشن",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "cl13",
+                    "name": "اضغط للفتح",
+                    "url": "https://drive.google.com/drive/folders/1raNAZNe39aM6t5BOoQ9GLqF711Mb3sQB"
+                  }
+                ]
+              },
+              {
+                "id": "c4",
+                "name": "درايف المادة",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "cl14",
+                    "name": "اضغط هنا",
+                    "url": "https://drive.google.com/drive/folders/13WRt7dP7A05InBXNhjXBB2L5Bx8_PdLe"
+                  }
+                ]
+              }
+            ],
+            "notes": [
+              {
+                "id": 1774265313920,
+                "content": "الميد تيرم على اول ٥ محاضرات لدكتور احمد صالح \nواول ٦ محاضرات لدكتور محمود سعفان",
+                "createdAt": "2026-03-23T11:28:33.920Z"
+              }
+            ]
+          },
+          {
+            "id": "course-social",
+            "title": "القضايا المجتمعية المعاصرة",
+            "doc": "Dr/Mohammed ElHelaly",
+            "icon": "fa-globe",
+            "color": "from-amber-500 to-orange-600",
+            "image": "",
+            "type": "course",
+            "sections": [
+              {
+                "id": "so1",
+                "name": "درايف المادة",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "sol1",
+                    "name": "اضغط للفتح",
+                    "url": "https://drive.google.com/drive/folders/1nYGx7i_lUoP-Ws5MtyzJVgLFMy3xi8yd"
+                  }
+                ]
+              }
+            ],
+            "notes": []
+          },
+          {
+            "id": "course-drives",
+            "title": "Drives",
+            "doc": "درايف الدفعه",
+            "icon": "fa-hard-drive",
+            "color": "from-green-500 to-emerald-600",
+            "image": "",
+            "type": "course",
+            "sections": [
+              {
+                "id": "dr1",
+                "name": "Drive level 0",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "drl1",
+                    "name": "اضغط للفتح",
+                    "url": "https://drive.google.com/drive/folders/1H_S2BpWhiIdpSRf_JghoLOlEyhUal_85"
+                  }
+                ]
+              }
+            ],
+            "notes": []
+          },
+          {
+            "id": "course-turtle",
+            "title": "حلول سلحفية",
+            "doc": "Magdy_Turtle",
+            "icon": "fa-lightbulb",
+            "color": "from-pink-500 to-rose-600",
+            "image": "",
+            "type": "course",
+            "sections": [
+              {
+                "id": "t1",
+                "name": "حلول ميكانيكا",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "tl1",
+                    "name": "Turtle(MID {2023-2025}).pdf",
+                    "url": "https://drive.google.com/file/d/1CRiglIHAX4K-agkQ_2DtjZGA3DbMKnLG/view?usp=sharing"
+                  },
+                  {
+                    "id": "tl2",
+                    "name": "Pedri_Fluid_Statics_Problems.pdf",
+                    "url": "https://drive.google.com/file/d/1-sxN9Pkin824KWpghwCvI7DU625SVh-V/view?usp=sharing"
+                  },
+                  {
+                    "id": "tl3",
+                    "name": "CH9_KINEMATICS_Ice_Turtle",
+                    "url": "https://drive.google.com/file/d/17R9Uaa1-ycYIxZIv_ZWRYFlbCRJ1GHHB/view?usp=sharing"
+                  }
+                ]
+              },
+              {
+                "id": "t2",
+                "name": "حلول فيزياء كهربية",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "tl4",
+                    "name": "Turtle_answers_ch3_electricity",
+                    "url": "https://drive.google.com/file/d/1Ypwa4Vl0tsXVNZifPnB3yonXUFdMxXLM/view?usp=sharing"
+                  }
+                ]
+              }
+            ],
+            "notes": []
+          },
+          {
+            "id": "course-raouf",
+            "title": "بصمجيات رؤوف",
+            "doc": "عمي وعم عيالي الدكتور رؤوف",
+            "icon": "fa-star",
+            "color": "from-red-500 to-pink-600",
+            "image": "",
+            "type": "course",
+            "sections": [
+              {
+                "id": "r1",
+                "name": "بصمجيات الانتاج",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "rl1",
+                    "name": "بصمجيات عمو رؤوف لشفوي الانتاج",
+                    "url": "https://drive.google.com/file/d/1ODsHAxHIEKmCBDt9liSIgjfDsLIHCMMw/view?usp=drive_link"
+                  }
+                ]
+              }
+            ],
+            "notes": []
+          },
+          {
+            "id": "course-communist",
+            "title": "الملخصات الاشتراكية للقضاء على الرأسمالية",
+            "doc": "comrade general ice cube",
+            "icon": "fa-book-open",
+            "color": "from-red-600 to-rose-700",
+            "image": "",
+            "type": "course",
+            "sections": [
+              {
+                "id": "com1",
+                "name": "ملخصات برمجه",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "coml1",
+                    "name": "Ice and Steell in the art of C-1",
+                    "url": "https://drive.google.com/file/d/1CNbLya514Bn67HL1M1YFjMr5gi8Ear3l/view?usp=drive_link"
+                  }
+                ]
+              }
+            ],
+            "notes": [
+              {
+                "id": 1778161536493,
+                "content": "غير مسموح بدخول اصحاب القلوب الضعيفه والنفسيات الهشه واتباع الرأسمالية",
+                "createdAt": "2026-05-07T13:45:36.493Z"
+              }
+            ]
+          },
+          {
+            "id": "course-duck",
+            "title": "ملخصات بطوط",
+            "doc": "🦆",
+            "icon": "fa-feather",
+            "color": "from-yellow-500 to-amber-600",
+            "image": "",
+            "type": "course",
+            "sections": [
+              {
+                "id": "duck1",
+                "name": "ملخص ورش انتاج",
+                "badge": "مضاف",
+                "links": [
+                  {
+                    "id": "duckl1",
+                    "name": "Ducks's Revision 🦆-1",
+                    "url": "https://drive.google.com/file/d/16gCqc8LeBcz_3uPvbVsN6f4EnBRuKiHd/view?usp=drive_link"
+                  }
+                ]
+              }
+            ],
+            "notes": []
+          }
+        ]
+      }
+    },
+    "comm": {
+      "years": {
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": []
+      }
+    },
+    "power": {
+      "years": {
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": []
+      }
+    },
+    "mech": {
+      "years": {
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": []
+      }
+    },
+    "prod": {
+      "years": {
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": []
+      }
+    },
+    "arch": {
+      "years": {
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": []
+      }
+    },
+    "civil": {
+      "years": {
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": []
+      }
+    },
+    "commcomp": {
+      "years": {
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": []
+      }
+    },
+    "mechat": {
+      "years": {
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": []
+      }
+    },
+    "ai": {
+      "years": {
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": []
+      }
+    }
+  }
+}

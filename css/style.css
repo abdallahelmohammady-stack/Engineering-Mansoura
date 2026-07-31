@@ -1,0 +1,174 @@
+/* ============================================================
+   مكتبة مواد كلية هندسة — التصميم
+   (نفس هوية الموقع الأصلي + إضافات شريط الفرق وتسجيل الدخول)
+   ============================================================ */
+*{font-family:'Cairo',sans-serif}
+html,body{margin:0;padding:0;min-height:100vh}
+#root{display:flex;flex-direction:column;min-height:100vh}
+.dot-pattern{background-image:radial-gradient(circle,rgba(99,102,241,0.22) 1.5px,transparent 1.5px);background-size:20px 20px}
+.dark .dot-pattern{background-image:radial-gradient(circle,rgba(99,102,241,0.1) 1px,transparent 1px);background-size:20px 20px}
+.glass{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.card-hover{transition:all 0.3s cubic-bezier(0.4,0,0.2,1)}
+.card-hover:hover{transform:translateY(-4px)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes modalIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+@keyframes toastIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.fade-in{animation:fadeIn 0.3s ease forwards}
+.modal-animate{animation:modalIn 0.25s ease forwards}
+.toast-in{animation:toastIn 0.35s ease forwards}
+.shake{animation:shake 0.4s ease}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#6366f1;border-radius:3px}
+
+input,textarea{font-family:'Cairo',sans-serif !important}
+
+.move-btn{width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:5px;font-size:9px;transition:all 0.2s;flex-shrink:0;border:none;cursor:pointer;background:transparent}
+.move-btn:hover:not(:disabled){transform:scale(1.15)}
+.move-btn:disabled{opacity:0.25;cursor:not-allowed}
+.upload-zone{border:2px dashed #6366f1 !important;border-radius:1rem !important;padding:2rem !important;text-align:center !important;cursor:pointer;transition:all 0.3s}
+.upload-zone:hover{background:rgba(99,102,241,0.1) !important;border-color:#818cf8 !important}
+.upload-zone.dragover{background:rgba(99,102,241,0.2) !important;border-color:#818cf8 !important;transform:scale(1.01)}
+
+/* Dark mode contrast fixes (modals, forms, sections, course content) */
+.dark, .dark body{color-scheme:dark}
+.dark body{background-color:#030712;color:#e5e7eb}
+.dark input, .dark textarea, .dark select{
+  background-color:#1f2937 !important;
+  color:#f9fafb !important;
+  border-color:#4b5563 !important;
+  caret-color:#f9fafb;
+}
+.dark input::placeholder, .dark textarea::placeholder{color:#9ca3af !important;opacity:1}
+.dark input:focus, .dark textarea:focus, .dark select:focus{
+  border-color:#6366f1 !important;
+  outline:none;
+  box-shadow:0 0 0 2px rgba(99,102,241,0.35);
+}
+/* Modal panels */
+.dark .modal-animate{
+  background-color:#111827 !important;
+  border-color:#374151 !important;
+  color:#f3f4f6 !important;
+}
+.dark .modal-animate h3,
+.dark .modal-animate label{color:#f3f4f6 !important}
+.dark .modal-animate p{color:#d1d5db}
+.dark .modal-panel .border-b,
+.dark .modal-panel .border-t{border-color:#374151 !important}
+.dark .bg-gray-50{background-color:#1f2937 !important}
+.dark .bg-white{background-color:#111827 !important}
+.dark .bg-white\/80{background-color:rgba(17,24,39,0.88) !important}
+.dark .text-gray-800{color:#f3f4f6 !important}
+.dark .text-gray-700{color:#e5e7eb !important}
+.dark .text-gray-600{color:#d1d5db !important}
+.dark .text-gray-500{color:#9ca3af !important}
+.dark .text-gray-400{color:#9ca3af !important}
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-300{border-color:#374151 !important}
+.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-gray-100:hover{background-color:#1f2937 !important}
+.dark .upload-zone{background-color:rgba(17,24,39,0.6) !important}
+.dark .upload-zone p{color:#e5e7eb !important}
+
+/* ------------------------------------------------------------
+   شريط الفرق (Year tabs) — جوه صفحة كل قسم
+   ------------------------------------------------------------ */
+.year-bar{
+  display:flex;gap:.5rem;overflow-x:auto;padding:.35rem;
+  background:rgba(255,255,255,.75);
+  border:1px solid #e5e7eb;border-radius:1rem;
+  -webkit-overflow-scrolling:touch;scrollbar-width:thin;
+}
+.dark .year-bar{background:rgba(17,24,39,.75);border-color:#374151}
+.year-tab{
+  flex:1 0 auto;white-space:nowrap;cursor:pointer;
+  padding:.65rem 1.1rem;border-radius:.8rem;border:none;
+  font-weight:700;font-size:.9rem;color:#6b7280;background:transparent;
+  display:flex;align-items:center;justify-content:center;gap:.5rem;
+  transition:all .2s;
+}
+.dark .year-tab{color:#9ca3af}
+.year-tab:hover{color:#4f46e5;background:rgba(99,102,241,.08)}
+.year-tab.active{
+  color:#fff;background:linear-gradient(to left,#6366f1,#a855f7);
+  box-shadow:0 4px 14px rgba(99,102,241,.35);
+}
+.year-tab .count{
+  font-size:.68rem;font-weight:800;padding:.05rem .45rem;border-radius:999px;
+  background:rgba(99,102,241,.15);color:#6366f1;
+}
+.year-tab.active .count{background:rgba(255,255,255,.25);color:#fff}
+
+/* ------------------------------------------------------------
+   صفحة تسجيل الدخول (نسخة الأدمن)
+   ------------------------------------------------------------ */
+.login-wrap{min-height:80vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.login-card{
+  width:100%;max-width:26rem;border-radius:1.5rem;padding:2.2rem;
+  background:#fff;border:1px solid #e5e7eb;
+  box-shadow:0 20px 60px rgba(99,102,241,.15);
+}
+.dark .login-card{background:#111827;border-color:#374151}
+.login-field{display:flex;align-items:center;gap:.7rem;border:1px solid #d1d5db;border-radius:.9rem;padding:.8rem 1rem;margin-bottom:1rem;background:#f9fafb}
+.dark .login-field{background:#1f2937;border-color:#4b5563}
+.login-field:focus-within{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.18)}
+.login-field input{border:none;outline:none;background:transparent;flex:1;font-size:1rem}
+.dark .login-field input{background:transparent !important;box-shadow:none !important}
+
+/* صور المعرض */
+.gallery-grid img{cursor:pointer;transition:transform .2s}
+.gallery-grid img:hover{transform:scale(1.03)}
+.lightbox{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:1.5rem;cursor:zoom-out}
+.lightbox img{max-width:100%;max-height:90vh;border-radius:1rem;box-shadow:0 10px 50px rgba(0,0,0,.5)}
+
+/* التوست */
+#toasts{position:fixed;top:1rem;left:1rem;z-index:99999;display:flex;flex-direction:column;gap:.5rem;max-width:320px}
+.toast{display:flex;align-items:center;gap:.7rem;padding:.75rem 1rem;border-radius:.9rem;color:#fff;font-size:.875rem;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.25);cursor:pointer}
+.toast.success{background:linear-gradient(to left,#10b981,#0d9488)}
+.toast.error{background:linear-gradient(to left,#ef4444,#e11d48)}
+.toast.info{background:linear-gradient(to left,#6366f1,#9333ea)}
+
+/* عناصر الأدمن — بتظهر بالهوفر على الديسكتوب */
+.admin-hover{transition:opacity .2s}
+
+/* منيو صغيرة للهيدر على الموبايل */
+.header-btn{white-space:nowrap}
+
+/* ============================================================
+   📱 تحسينات الموبايل (اتعلم منها يا هندسة)
+   ============================================================ */
+
+/* 1) الموبايل مفيهوش hover! فأزرار التعديل المخفية لازم تظهر */
+@media (hover:none){
+  .group .opacity-0{opacity:1 !important}
+  .admin-hover{opacity:1 !important}
+}
+
+/* 2) المودال على الشاشات الصغيرة: عرض 94% وحواف مريحة */
+@media (max-width:768px){
+  .modal-panel{width:94% !important;max-height:88vh !important}
+  .modal-panel .p-6{padding:1.25rem !important}
+  body{padding-bottom:0}
+  main{padding-bottom:5rem}
+
+  /* الهيدر: نصوص أصغر وأزرار مضغوطة */
+  .header-btn span.btn-label{display:none}
+  .header-btn{padding:.55rem .7rem !important}
+
+  /* شريط الفرق: تابات أنحف */
+  .year-tab{padding:.55rem .8rem;font-size:.8rem}
+}
+
+/* 3) شاشات صغيرة جداً */
+@media (max-width:480px){
+  .login-card{padding:1.4rem}
+  h1.site-title{font-size:1.6rem !important}
+}
+
+/* 4) شبكة صور المعرض تبقى عمودين على الموبايل */
+@media (max-width:640px){
+  .gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+}
