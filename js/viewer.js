@@ -474,7 +474,7 @@ function renderHome() {
       '<main class="flex-1 max-w-7xl w-full mx-auto px-4 py-8">' +
         '<div class="text-center mb-10 fade-in">' +
           '<h1 class="site-title text-3xl md:text-4xl font-black text-gray-800 dark:text-white mb-3">مكتبة مواد كلية هندسة</h1>' +
-          '<p class="text-gray-500 dark:text-gray-400 max-w-xl mx-auto">اختار قسمك من الكروت اللي تحت — كل اللينكات والملخصات والملاحظات اللي الأدمنز رافعينها هتلاقيها جوه قسمك</p>' +
+          '<p class="text-gray-500 dark:text-gray-400 max-w-xl mx-auto">اختار القسم من البارتيشنز اللي تحت — كل اللينكات والملخصات والملاحظات اللي الأدمنز رافعينها هتلاقيها جوا البارتيشن الخاص بيها </p>' +
         '</div>';
   groups.forEach(g => {
     const depts = DEPARTMENTS.filter(d => d.group === g);
