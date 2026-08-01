@@ -177,7 +177,7 @@
       + '<div style="font-weight:800;margin-bottom:6px">🛠️ جرّب الحلول دي بالترتيب:</div>'
       + '<ol style="margin:0;padding-right:20px;color:#cbd5e1">'
       + '<li>افتح المسار اللي فوق في تاب لوحده — المفروض تشوف نص طويل فيه بيانات الموقع.'
-      + (is404 ? ' <b style="color:#fca5a5">(ظهر 404؟ يبقى فولدر data مش مترفع صح 👇)</b>' : '') + '</li>'
+      + (is404 ? ' <b style="color:#fca5a5">(ظهر 404؟ يبقى فولدر data مش مترفع صح)</b>' : '') + '</li>'
       + '<li>اتأكد إن فولدر <b style="font-family:monospace">data</b> مترفع جوه نفس فولدر الصفحة (جنب <b style="font-family:monospace">js</b> و <b style="font-family:monospace">css</b>) وبنفس الاسم بحروف small.</li>'
       + '<li>اعمل تحديث قوي للصفحة: <b dir="ltr">Cmd+Shift+R</b> على ماك أو <b dir="ltr">Ctrl+Shift+R</b> على ويندوز.</li>'
       + '<li>لو لسه — خد سكرين شوت للشاشة دي وابعتها 🙏</li>'
@@ -282,7 +282,13 @@ const TERM_ORDER = ['1', '2'];
 const TERM_NAMES = { '1': 'الترم الأول', '2': 'الترم الثاني' };
 const LEVEL_NAMES = { '1': 'Level 100', '2': 'Level 200', '3': 'Level 300', '4': 'Level 400' };
 function yearLabel(d, y) { return (d && d.group === 'special') ? LEVEL_NAMES[y] : YEAR_NAMES[y]; }
-function courseSem(c) { return (c && String(c.sem) === '2') ? '2' : '1'; }
+function courseSem(c, deptId) {
+  // sem الصريح ليه الأولوية — القديم من غير sem بيتحسب حسب القسم:
+  // اعدادي → ترم تاني (المحتوى الحالي)، الباقي → ترم أول
+  if (c && String(c.sem) === '2') return '2';
+  if (c && String(c.sem) === '1') return '1';
+  return deptId === 'prep' ? '2' : '1';
+}
 
 // ---------------- التوست (عرض رسائل بس) ----------------
 function showToast(msg, type) {
@@ -365,7 +371,9 @@ function parseRoute() {
     route.dept = parts[0];
     const d = deptOf(route.dept);
     if (d.noYears) {
-      route.course = parts[1] || null;
+      // اعدادي برضه متقسمة ترمين: parts[1] = الترم، parts[2] = المادة
+      if (TERM_ORDER.includes(parts[1])) { route.term = parts[1]; route.course = parts[2] || null; }
+      else { route.course = parts[1] || null; } // روابط قديمة بتفضل شغالة
     } else {
       if (YEAR_ORDER.includes(parts[1])) {
         route.year = parts[1];
@@ -382,11 +390,11 @@ function openYear(deptId, year) { window.location.hash = deptId + '/' + year; }
 function openTerm(deptId, year, term) { window.location.hash = deptId + '/' + year + '/' + term; }
 function openCourse(dept, year, term, courseId) {
   const d = deptOf(dept);
-  window.location.hash = d.noYears ? (dept + '/' + courseId) : (dept + '/' + year + '/' + term + '/' + courseId);
+  window.location.hash = d.noYears ? (dept + '/' + term + '/' + courseId) : (dept + '/' + year + '/' + term + '/' + courseId);
 }
 function closeCourseView(dept, year, term) {
   const d = deptOf(dept);
-  window.location.hash = d.noYears ? dept : (term ? (dept + '/' + year + '/' + term) : (dept + '/' + year));
+  window.location.hash = d.noYears ? (term ? (dept + '/' + term) : dept) : (term ? (dept + '/' + year + '/' + term) : (dept + '/' + year));
 }
 window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
 
@@ -454,8 +462,8 @@ function renderHome() {
       headerHTML({ dept: null }) +
       '<main class="flex-1 max-w-7xl w-full mx-auto px-4 py-8">' +
         '<div class="text-center mb-10 fade-in">' +
-          '<h1 class="site-title text-3xl md:text-4xl font-black text-gray-800 dark:text-white mb-3">📚 مكتبة مواد كلية هندسة</h1>' +
-          '<p class="text-gray-500 dark:text-gray-400 max-w-xl mx-auto">اختار قسمك من الكروت اللي تحت — كل اللينكات والملخصات والملاحظات اللي الأدمنز رافعينها هتلاقيها جوه قسمك 💪</p>' +
+          '<h1 class="site-title text-3xl md:text-4xl font-black text-gray-800 dark:text-white mb-3">مكتبة مواد كلية هندسة</h1>' +
+          '<p class="text-gray-500 dark:text-gray-400 max-w-xl mx-auto">اختار قسمك من الكروت اللي تحت — كل اللينكات والملخصات والملاحظات اللي الأدمنز رافعينها هتلاقيها جوه قسمك</p>' +
         '</div>';
   groups.forEach(g => {
     const depts = DEPARTMENTS.filter(d => d.group === g);
@@ -510,7 +518,7 @@ function renderDept(deptId, year) {
             '<div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"><i class="fa ' + d.icon + '"></i></div>' +
             '<div>' +
               '<h1 class="text-xl sm:text-2xl font-black">' + esc(d.name) + '</h1>' +
-              '<p class="text-white/80 text-sm mt-1">' + esc(d.desc || '') + (d.noYears ? ' • محتوى السنة الإعدادية كلها هنا' : ' • اختار ' + (d.group === 'special' ? 'المستوى' : 'الفرقة') + ' وشوفه متقسّم ترمين 👇') + '</p>' +
+              '<p class="text-white/80 text-sm mt-1">' + esc(d.desc || '') + (d.noYears ? ' • مواد اعدادي مقسّمة على ترمين' : ' • اختار ' + (d.group === 'special' ? 'المستوى' : 'الفرقة') + ' وشوفه متقسّم ترمين') + '</p>' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -529,19 +537,19 @@ function renderDeptGrid() {
   const deptId = route.dept;
   const d = deptOf(deptId);
   const year = d.noYears ? '1' : route.year;
-  const term = d.noYears ? null : route.term;
+  const term = route.term;
   const all = getYearCourses(deptId, year);
   const q = (searchQuery || '').trim().toLowerCase();
 
   /* ===== (أ) عرض كروت الترمين — أول ما تختار فرقة ===== */
-  if (!d.noYears && !term && !q) {
+  if (!term && !q) {
     const termStats = (list) => ({
       courses: list.filter(c => c.type !== 'gallery').length,
       galleries: list.filter(c => c.type === 'gallery').length,
       links: list.reduce((a, c) => a + (c.sections || []).reduce((b, s) => b + (s.links || []).length, 0), 0)
     });
     const termCard = (t, iconClass, grad) => {
-      const st = termStats(all.filter(c => courseSem(c) === t));
+      const st = termStats(all.filter(c => courseSem(c, deptId) === t));
       return '' +
       '<div class="card-hover cursor-pointer group relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl" onclick="openTerm(\'' + deptId + '\',\'' + year + '\',\'' + t + '\')">' +
         '<div class="h-2 bg-gradient-to-r ' + grad + '"></div>' +
@@ -549,7 +557,7 @@ function renderDeptGrid() {
           '<div class="flex items-center gap-4 mb-4">' +
             '<div class="w-14 h-14 bg-gradient-to-br ' + grad + ' rounded-2xl flex items-center justify-center text-white text-xl shadow-md flex-shrink-0"><i class="fa ' + iconClass + '"></i></div>' +
             '<div class="min-w-0"><h3 class="font-black text-gray-800 dark:text-white text-lg leading-tight">' + TERM_NAMES[t] + '</h3>' +
-            '<p class="text-xs text-gray-400 mt-1 truncate">' + esc(yearLabel(d, year)) + ' • ' + esc(d.name) + '</p></div>' +
+            '<p class="text-xs text-gray-400 mt-1 truncate">' + (d.noYears ? esc(d.name) : esc(yearLabel(d, year)) + ' • ' + esc(d.name)) + '</p></div>' +
           '</div>' +
           '<div class="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500 border-t border-gray-100 dark:border-gray-700 pt-3">' +
             '<span class="flex items-center gap-1"><i class="fa fa-book text-indigo-400"></i><span>' + st.courses + ' مادة</span></span>' +
@@ -566,7 +574,7 @@ function renderDeptGrid() {
           '<i class="fa fa-search absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 text-sm"></i>' +
           '<input id="search-input" value="' + esc(searchQuery) + '" oninput="onSearchInput(this.value)" placeholder="🔍 ابحث في كل مواد ' + esc(yearLabel(d, year)) + '..." class="w-full pr-11 pl-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm">' +
         '</div>' +
-        '<p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex items-center gap-2"><i class="fa fa-layer-group text-indigo-400"></i>' + esc(yearLabel(d, year)) + ' متقسّمة على ترمين — اختار الترم اللي عايزه 👇</p>' +
+        '<p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex items-center gap-2"><i class="fa fa-layer-group text-indigo-400"></i>' + esc(d.noYears ? d.name : yearLabel(d, year)) + ' متقسّمة على ترمين — اختار الترم اللي عايزه</p>' +
         '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">' +
           termCard('1', 'fa-1', 'from-indigo-500 to-purple-600') +
           termCard('2', 'fa-2', 'from-emerald-500 to-teal-600') +
@@ -576,11 +584,11 @@ function renderDeptGrid() {
   }
 
   /* ===== (ب) عرض مواد ترم معيّن — أو اعدادي، أو نتائج بحث في كل الترمين ===== */
-  const scoped = (!d.noYears && term) ? all.filter(c => courseSem(c) === term) : all;
+  const scoped = term ? all.filter(c => courseSem(c, deptId) === term) : all;
   const filtered = q ? all.filter(c => (c.title || '').toLowerCase().includes(q) || (c.doc || '').toLowerCase().includes(q)) : scoped;
   const totalLinks = scoped.reduce((a, c) => a + (c.sections || []).reduce((b, s) => b + (s.links || []).length, 0), 0);
   const galleries = scoped.filter(c => c.type === 'gallery').length;
-  const scopeLabel = d.noYears ? d.name : (term ? (yearLabel(d, year) + ' — ' + TERM_NAMES[term]) : yearLabel(d, year));
+  const scopeLabel = d.noYears ? (d.name + (term ? (' — ' + TERM_NAMES[term]) : '')) : (term ? (yearLabel(d, year) + ' — ' + TERM_NAMES[term]) : yearLabel(d, year));
 
   area.innerHTML =
     '<div class="fade-in">' +
@@ -588,10 +596,10 @@ function renderDeptGrid() {
         '<i class="fa fa-search absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 text-sm"></i>' +
         '<input id="search-input" value="' + esc(searchQuery) + '" oninput="onSearchInput(this.value)" placeholder="🔍 ابحث عن مادة أو معرض في ' + esc(scopeLabel) + '..." class="w-full pr-11 pl-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm">' +
       '</div>' +
-      ((!d.noYears && term) ?
+      (term ?
         '<div class="flex items-center gap-2 mb-5 flex-wrap">' +
-          '<button onclick="openYear(\'' + deptId + '\',\'' + year + '\')" class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-indigo-500"><i class="fa fa-arrow-right"></i> كل الترمين</button>' +
-          '<span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1.5 rounded-xl"><i class="fa fa-' + term + ' ml-1"></i>' + esc(yearLabel(d, year)) + ' • ' + TERM_NAMES[term] + '</span>' +
+          '<button onclick="' + (d.noYears ? ('openDept(\'' + deptId + '\')') : ('openYear(\'' + deptId + '\',\'' + year + '\')')) + '" class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-indigo-500"><i class="fa fa-arrow-right"></i> كل الترمين</button>' +
+          '<span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1.5 rounded-xl"><i class="fa fa-' + term + ' ml-1"></i>' + (d.noYears ? '' : esc(yearLabel(d, year)) + ' • ') + TERM_NAMES[term] + '</span>' +
         '</div>'
       : '') +
       '<div class="grid grid-cols-3 gap-3 mb-8">' +
@@ -602,12 +610,12 @@ function renderDeptGrid() {
       '</div>' +
       (filtered.length === 0 ?
         '<div class="text-center py-20"><div class="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl text-gray-300"><i class="fa ' + (q ? 'fa-search' : 'fa-graduation-cap') + '"></i></div>' +
-        '<p class="text-gray-400 font-semibold text-lg">' + (q ? '❌ لا توجد نتائج' : '📚 لسه مفيش محتوى في ' + esc(scopeLabel)) + '</p>' +
-        (!q ? '<p class="text-gray-400 text-sm mt-2">أدمن القسم لسه مارفعش حاجة هنا — ارجع له تاني قريب 😉</p>' : '') +
+        '<p class="text-gray-400 font-semibold text-lg">' + (q ? '❌ لا توجد نتائج' : 'لسه مفيش محتوى في ' + esc(scopeLabel)) + '</p>' +
+        (!q ? '<p class="text-gray-400 text-sm mt-2">أدمن القسم لسه مارفعش حاجة هنا — ارجع له تاني قريب</p>' : '') +
         '</div>'
       :
         '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">' +
-          filtered.map((c, i) => courseCardHTML(deptId, year, term || (d.noYears ? null : courseSem(c)), c, i)).join('') +
+          filtered.map((c, i) => courseCardHTML(deptId, year, term || courseSem(c, deptId), c, i)).join('') +
         '</div>'
       ) +
     '</div>';
@@ -618,7 +626,7 @@ function courseCardHTML(deptId, year, term, c, index) {
   const links = (c.sections || []).reduce((a, s) => a + (s.links || []).length, 0);
   const color = c.color || COURSE_COLORS[index % COURSE_COLORS.length];
   return '' +
-  '<div class="card-hover cursor-pointer group relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl" onclick="openCourse(\'' + deptId + '\',\'' + year + '\',\'' + (term || courseSem(c)) + '\',\'' + c.id + '\')">' +
+  '<div class="card-hover cursor-pointer group relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl" onclick="openCourse(\'' + deptId + '\',\'' + year + '\',\'' + (term || courseSem(c, deptId)) + '\',\'' + c.id + '\')">' +
     '<div class="h-2 bg-gradient-to-r ' + color + '"></div>' +
     '<div class="p-5">' +
       '<div class="flex items-start justify-between mb-4">' +
@@ -700,7 +708,7 @@ function renderCourse(deptId, year, courseId) {
     '<div class="min-h-screen flex flex-col transition-colors duration-300 ' + (darkMode ? 'dark bg-gray-950' : 'bg-gray-50') + ' dot-pattern">' +
       headerHTML({ dept: deptId, course: courseId }) +
       '<main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6">' +
-        '<button onclick="closeCourseView(\'' + deptId + '\',\'' + year + '\',\'' + courseSem(c) + '\')" class="flex items-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-500 mb-4"><i class="fa fa-arrow-right"></i> رجوع لـ ' + esc((deptOf(deptId) || {}).name || '') + '</button>' +
+        '<button onclick="closeCourseView(\'' + deptId + '\',\'' + year + '\',\'' + courseSem(c, deptId) + '\')" class="flex items-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-500 mb-4"><i class="fa fa-arrow-right"></i> رجوع لـ ' + esc((deptOf(deptId) || {}).name || '') + '</button>' +
         '<div class="rounded-3xl p-6 mb-6 bg-gradient-to-r ' + color + ' text-white shadow-lg fade-in">' +
           '<div class="flex items-center gap-4 min-w-0">' +
             '<div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-2xl overflow-hidden flex-shrink-0">' + (c.image ? '<img src="' + esc(c.image) + '" class="w-full h-full object-cover" alt="">' : '<i class="fa ' + (c.icon || 'fa-book') + '"></i>') + '</div>' +
@@ -734,7 +742,7 @@ function renderGallery(deptId, year, c) {
     '<div class="min-h-screen flex flex-col transition-colors duration-300 ' + (darkMode ? 'dark bg-gray-950' : 'bg-gray-50') + ' dot-pattern">' +
       headerHTML({ dept: deptId, course: c.id }) +
       '<main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6">' +
-        '<button onclick="closeCourseView(\'' + deptId + '\',\'' + year + '\',\'' + courseSem(c) + '\')" class="flex items-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-500 mb-4"><i class="fa fa-arrow-right"></i> رجوع</button>' +
+        '<button onclick="closeCourseView(\'' + deptId + '\',\'' + year + '\',\'' + courseSem(c, deptId) + '\')" class="flex items-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-500 mb-4"><i class="fa fa-arrow-right"></i> رجوع</button>' +
         '<div class="rounded-3xl p-6 mb-6 bg-gradient-to-r ' + color + ' text-white shadow-lg fade-in">' +
           '<div class="flex items-center gap-4">' +
             '<div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-2xl overflow-hidden flex-shrink-0">' + (c.image ? '<img src="' + esc(c.image) + '" class="w-full h-full object-cover" alt="">' : '<i class="fa fa-images"></i>') + '</div>' +
