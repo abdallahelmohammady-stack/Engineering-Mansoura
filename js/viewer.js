@@ -387,14 +387,25 @@ function parseRoute() {
 function goHome() { window.location.hash = ''; }
 function openDept(id) { window.location.hash = id; }
 function openYear(deptId, year) { window.location.hash = deptId + '/' + year; }
-function openTerm(deptId, year, term) { window.location.hash = deptId + '/' + year + '/' + term; }
+function openTerm(deptId, year, term) {
+  const d = deptOf(deptId);
+  // اعدادي مفيهاش سنين: اللينك بيبقى قسم/ترم بس، غير كده قسم/سنة/ترم
+  window.location.hash = d.noYears ? (deptId + '/' + term) : (deptId + '/' + year + '/' + term);
+}
 function openCourse(dept, year, term, courseId) {
   const d = deptOf(dept);
   window.location.hash = d.noYears ? (dept + '/' + term + '/' + courseId) : (dept + '/' + year + '/' + term + '/' + courseId);
 }
-function closeCourseView(dept, year, term) {
+function closeCourseView(dept, year, term, replace) {
   const d = deptOf(dept);
-  window.location.hash = d.noYears ? (term ? (dept + '/' + term) : dept) : (term ? (dept + '/' + year + '/' + term) : (dept + '/' + year));
+  const h = d.noYears ? (term ? (dept + '/' + term) : dept) : (term ? (dept + '/' + year + '/' + term) : (dept + '/' + year));
+  if (replace) {
+    // لينك مكسور: استبدال الهاش في الهيستوري بدل الإضافة عشان زرار باك يفضل شغال
+    try { history.replaceState(null, '', '#' + h); render(); window.scrollTo(0, 0); }
+    catch (e) { window.location.hash = h; }
+    return;
+  }
+  window.location.hash = h;
 }
 window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
 
@@ -797,7 +808,7 @@ function render() {
   const year = d.noYears ? '1' : route.year;
   if (route.course) {
     const c = findCourse(route.dept, year, route.course);
-    if (!c) { closeCourseView(route.dept, year, route.term); return; }
+    if (!c) { closeCourseView(route.dept, year, route.term, true); return; }
     renderCourse(route.dept, year, route.course);
   } else {
     renderDept(route.dept, year);
