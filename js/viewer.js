@@ -1,3 +1,231 @@
+/* ================================================================
+   📦 SitesLoader v1 — محمّل المحتوى الموحّد لنسخ الزائر (user)
+   ----------------------------------------------------------------
+   ليه موجود؟ لأن نسخة الزائر بتقرأ المحتوى من ملف data/sites.json،
+   ولو الملف ده مش مترفع على الاستضافة صح كانت الصفحة بتفضل فاضية
+   من غير أي سبب واضح. المحمّل ده بيحل 3 حاجات:
+
+   1) شاشة "⏳ جاري تحميل المحتوى" أول ما الصفحة تفتح.
+   2) لو الـ fetch فشل (404 / شبكة) ⬅️ بيحاول تلقائيًا يحمّل النسخة
+      الاحتياطية المدمجة js/embedded-data.js (بتتولّد من sites.json).
+   3) لو الاتنين فشلوا ⬅️ شاشة تشخيص حمرا فيها: المسار اللي جرّبناه،
+      نتيجة المحاولة، وخطوات الحل واحدة واحدة + زر إعادة محاولة.
+
+   الاستخدام: بدل ما تعمل fetch بنفسك، نادِ:
+       const pack = await window.SitesLoader.load();
+       if(!pack) { return; } // فشل نهائي — شاشة التشخيص ظاهرة للزائر
+       const data = pack.data;   // نفس محتوى sites.json
+       pack.source;              // 'server' أو 'embedded'
+   ================================================================ */
+(function () {
+  if (window.SitesLoader) return;   // حماية من التحميل مرتين
+
+  var FETCH_TIMEOUT = 15000;        // أقصى وقت لانتظار السيرفر
+  var SCRIPT_TIMEOUT = 12000;       // أقصى وقت لتحميل النسخة المدمجة
+  var Z = 2147483000;               // فوق أي عنصر تاني في الصفحة
+  var FONT = '"Cairo","Tajawal",system-ui,-apple-system,"Segoe UI",sans-serif';
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /* ---------- شاشة التحميل / التشخيص (overlay) ---------- */
+  var overlay = null, subEl = null, msgEl = null;
+
+  function ensureOverlay() {
+    if (overlay && overlay.isConnected) return;
+    if (!document.getElementById('sl-style')) {
+      var st = document.createElement('style');
+      st.id = 'sl-style';
+      st.textContent = '@keyframes sl-spin{to{transform:rotate(360deg)}}'
+        + '@keyframes sl-in{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}';
+      document.head.appendChild(st);
+    }
+    overlay = document.createElement('div');
+    overlay.setAttribute('dir', 'rtl');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:' + Z + ';display:flex;align-items:center;'
+      + 'justify-content:center;background:rgba(8,10,18,.96);backdrop-filter:blur(6px);'
+      + 'font-family:' + FONT + ';color:#e5e7eb;padding:16px;overflow:auto;';
+    document.documentElement.appendChild(overlay);
+  }
+
+  function showLoading() {
+    ensureOverlay();
+    overlay.innerHTML = '<div style="text-align:center;max-width:340px;animation:sl-in .25s ease">'
+      + '<div style="width:46px;height:46px;margin:0 auto 14px;border:4px solid rgba(148,163,184,.25);'
+      + 'border-top-color:#818cf8;border-radius:50%;animation:sl-spin .9s linear infinite"></div>'
+      + '<div style="font-size:17px;font-weight:700">⏳ جاري تحميل المحتوى…</div>'
+      + '<div id="sl-sub" style="font-size:13px;color:#94a3b8;margin-top:8px;line-height:1.9"></div>'
+      + '</div>';
+    subEl = overlay.querySelector('#sl-sub');
+  }
+
+  function setSub(t) { if (subEl) subEl.textContent = t; }
+
+  function hideOverlay() {
+    if (overlay && overlay.isConnected) overlay.remove();
+    overlay = null; subEl = null;
+  }
+
+  /* ---------- شريط تنبيه "شغال بالنسخة الاحتياطية" ---------- */
+  function showEmbeddedBanner() {
+    if (document.getElementById('sl-embed-banner')) return;
+    var b = document.createElement('div');
+    b.id = 'sl-embed-banner';
+    b.setAttribute('dir', 'rtl');
+    b.style.cssText = 'position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:' + (Z - 1) + ';'
+      + 'background:#1f2937;border:1px solid rgba(251,191,36,.45);color:#fde68a;font-family:' + FONT + ';'
+      + 'font-size:13px;line-height:1.9;padding:10px 14px 10px 8px;border-radius:12px;max-width:92vw;'
+      + 'box-shadow:0 10px 30px rgba(0,0,0,.45);display:flex;gap:10px;align-items:flex-start;animation:sl-in .3s ease;';
+    b.innerHTML = '<span>⚠️ شغال دلوقتي <b>بنسخة احتياطية مدمجة</b> من المحتوى لأن ملف '
+      + '<b style="font-family:monospace">data/sites.json</b> مش متاح على السيرفر — '
+      + 'راجع خطوات الرفع عشان الزوّار يشوفوا آخر تحديث.</span>';
+    var x = document.createElement('button');
+    x.textContent = '✕';
+    x.setAttribute('aria-label', 'إغلاق');
+    x.style.cssText = 'background:none;border:none;color:#94a3b8;font-size:15px;cursor:pointer;padding:2px 4px;flex-shrink:0;';
+    x.onclick = function () { b.remove(); };
+    b.appendChild(x);
+    document.documentElement.appendChild(b);
+  }
+
+  /* ---------- fetch مع وقت أقصى + رسائل عربية واضحة ---------- */
+  function fetchJson(url) {
+    return new Promise(function (resolve, reject) {
+      var done = false;
+      var timer = setTimeout(function () {
+        finish(new Error('السيرفر خد وقت أطول من اللازم ومردّش (timeout بعد ' + Math.round(FETCH_TIMEOUT / 1000) + ' ثانية)'));
+      }, FETCH_TIMEOUT);
+
+      function finish(err, data) {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        if (err) reject(err); else resolve(data);
+      }
+
+      fetch(url, { cache: 'no-store' }).then(function (res) {
+        if (!res.ok) {
+          var msg = 'HTTP ' + res.status +
+            (res.status === 404 ? ' — الملف مش موجود على السيرفر (غالبًا فولدر data مش مترفع)'
+              : res.status === 403 ? ' — السيرفر رافض الوصول للملف (راجع صلاحيات الملفات)' : '');
+          var e = new Error(msg);
+          e.httpStatus = res.status;
+          finish(e);
+          return;
+        }
+        res.json().then(
+          function (d) { finish(null, d); },
+          function () { finish(new Error('الملف موجود بس محتواه مش JSON صالح — ممكن يكون اتنقل ناقص أو اتعدّل غلط')); }
+        );
+      }, function (netErr) {
+        var m = (netErr && netErr.message) || '';
+        finish(new Error(/failed to fetch|network|load failed/i.test(m)
+          ? 'فشل الاتصال بالسيرفر نهائيًا (مشكلة شبكة أو السيرفر واقف)'
+          : 'خطأ غير متوقع أثناء التحميل: ' + m));
+      });
+    });
+  }
+
+  /* ---------- تحميل النسخة الاحتياطية المدمجة (script tag — بتشتغل حتى على file://) ---------- */
+  function loadEmbedded() {
+    return new Promise(function (resolve) {
+      if (window.__EMBEDDED_SITES_DATA__) { resolve(window.__EMBEDDED_SITES_DATA__); return; }
+      var done = false;
+      function fin(ok) {
+        if (done) return; done = true;
+        clearTimeout(timer);
+        resolve(ok ? (window.__EMBEDDED_SITES_DATA__ || null) : null);
+      }
+      var timer = setTimeout(function () { fin(false); }, SCRIPT_TIMEOUT);
+      var s = document.createElement('script');
+      s.onload = function () { fin(true); };
+      s.onerror = function () { fin(false); };
+      s.src = 'js/embedded-data.js?ts=' + Date.now();
+      document.head.appendChild(s);
+    });
+  }
+
+  /* ---------- شاشة التشخيص النهائية ---------- */
+  function showFatal(url, err, embeddedTried) {
+    ensureOverlay();
+    var fileProto = location.protocol === 'file:';
+    var errMsg = err ? err.message : 'خطأ غير معروف';
+    var is404 = err && err.httpStatus === 404;
+
+    overlay.innerHTML = '<div style="max-width:560px;width:100%;background:#151a26;border:1px solid rgba(239,68,68,.35);'
+      + 'border-radius:18px;padding:26px 22px;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:sl-in .3s ease;line-height:2">'
+      + '<div style="font-size:42px;text-align:center">😵</div>'
+      + '<div style="font-size:21px;font-weight:800;text-align:center;margin-bottom:6px">المحتوى مش ظاهر</div>'
+      + '<p style="text-align:center;color:#94a3b8;font-size:14px;margin:0 0 16px">الصفحة نفسها شغّالة، بس المتصفح مش قادر يوصل لملف البيانات.</p>'
+
+      + '<div style="background:#0b0f19;border:1px solid rgba(148,163,184,.2);border-radius:12px;padding:12px 14px;font-size:12.5px;margin-bottom:10px">'
+      + '<div style="color:#94a3b8;margin-bottom:4px">📁 المسار اللي جرّبناه:</div>'
+      + '<div dir="ltr" style="font-family:monospace;color:#93c5fd;word-break:break-all;text-align:left">' + esc(url) + '</div>'
+      + '<div style="color:#94a3b8;margin:8px 0 4px">❌ النتيجة:</div>'
+      + '<div style="color:#fca5a5">' + esc(errMsg) + '</div>'
+      + '</div>'
+
+      + (fileProto
+        ? '<div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:10px 14px;font-size:13px;color:#fde68a;margin-bottom:10px">'
+          + '💡 إنت فاتح الصفحة <b>من ملف على جهازك</b> (file://) — المتصفح بيمنع المواقع من قراءة ملفات JSON المحلية. شغّل سيرفر محلي (زي ما في README) أو ارفع على الاستضافة.</div>'
+        : '')
+
+      + '<div style="background:#0b0f19;border:1px solid rgba(148,163,184,.15);border-radius:12px;padding:12px 16px;font-size:13.5px;margin-bottom:14px">'
+      + '<div style="font-weight:800;margin-bottom:6px">🛠️ جرّب الحلول دي بالترتيب:</div>'
+      + '<ol style="margin:0;padding-right:20px;color:#cbd5e1">'
+      + '<li>افتح المسار اللي فوق في تاب لوحده — المفروض تشوف نص طويل فيه بيانات الموقع.'
+      + (is404 ? ' <b style="color:#fca5a5">(ظهر 404؟ يبقى فولدر data مش مترفع صح 👇)</b>' : '') + '</li>'
+      + '<li>اتأكد إن فولدر <b style="font-family:monospace">data</b> مترفع جوه نفس فولدر الصفحة (جنب <b style="font-family:monospace">js</b> و <b style="font-family:monospace">css</b>) وبنفس الاسم بحروف small.</li>'
+      + '<li>اعمل تحديث قوي للصفحة: <b dir="ltr">Cmd+Shift+R</b> على ماك أو <b dir="ltr">Ctrl+Shift+R</b> على ويندوز.</li>'
+      + '<li>لو لسه — خد سكرين شوت للشاشة دي وابعتها 🙏</li>'
+      + '</ol></div>'
+
+      + (embeddedTried
+        ? '<div style="font-size:12px;color:#64748b;margin-bottom:14px">🔎 ملحوظة: النسخة الاحتياطية المدمجة (<span style="font-family:monospace">js/embedded-data.js</span>) برضه مش موجودة — يعني غالبًا فولدر كامل مترفعش على الاستضافة.</div>'
+        : '')
+
+      + '<button id="sl-retry" style="width:100%;background:#4f46e5;border:none;color:#fff;font-family:inherit;'
+      + 'font-size:15px;font-weight:700;padding:12px;border-radius:12px;cursor:pointer">🔄 إعادة المحاولة</button>'
+      + '</div>';
+
+    var btn = overlay.querySelector ? overlay.querySelector('#sl-retry') : null;
+    if (btn) btn.onclick = function () { location.reload(); };
+  }
+
+  /* ---------- الواجهة الرئيسية ---------- */
+  async function loadCore() {
+    showLoading();
+    var fullUrl = 'data/sites.json';
+    try { fullUrl = new URL('data/sites.json', location.href).href; } catch (e) { }
+
+    var fetchErr = null;
+    try {
+      var data = await fetchJson('data/sites.json');
+      hideOverlay();
+      return { data: data, source: 'server' };
+    } catch (err) {
+      fetchErr = err;
+      console.warn('[SitesLoader] فشل تحميل data/sites.json:', err);
+      setSub('السيرفر مردّش كويس… بنجرّب النسخة الاحتياطية المدمجة 🔄');
+    }
+
+    var emb = await loadEmbedded();
+    if (emb) {
+      hideOverlay();
+      showEmbeddedBanner();
+      return { data: emb, source: 'embedded' };
+    }
+
+    showFatal(fullUrl, fetchErr, true);
+    return null;
+  }
+
+  window.SitesLoader = { load: loadCore };
+})();
+
 /* ============================================================
    مكتبة مواد كلية هندسة — نسخة الزوّار (viewer.js)
    ------------------------------------------------------------
@@ -45,6 +273,17 @@ const NOTE_COLORS_DARK = [
 const COURSE_ICONS = ['fa-book','fa-flask','fa-calculator','fa-drafting-compass','fa-code','fa-cogs','fa-atom','fa-globe','fa-lightbulb','fa-graduation-cap','fa-brain','fa-chart-bar','fa-images','fa-camera','fa-photo-film','fa-panorama','fa-image','fa-mountain-sun','fa-industry','fa-hard-drive','fa-feather','fa-star','fa-book-open'];
 const COURSE_COLORS = ['from-indigo-500 to-purple-600','from-cyan-500 to-blue-600','from-emerald-500 to-teal-600','from-orange-500 to-red-500','from-pink-500 to-rose-600','from-violet-500 to-purple-700','from-sky-500 to-indigo-600','from-amber-500 to-orange-600','from-green-500 to-emerald-600','from-red-500 to-pink-600'];
 
+/* ---------------- الترمين (ترم أول / ترم تاني) ----------------
+   كل مادة ليها حقل اختياري sem: '1' = ترم أول (الافتراضي) / '2' = ترم تاني.
+   المواد القديمة اللي مفيهاش sem بتتحسب ترم أول تلقائياً — يعني بياناتك
+   القديمة شغالة من غير أي تعديل، وتوزّعها على الترمين من لوحة الأدمن.
+   أقسام البرامج النوعية (group:'special') بتتعرض باسم Level 100..400. */
+const TERM_ORDER = ['1', '2'];
+const TERM_NAMES = { '1': 'الترم الأول', '2': 'الترم الثاني' };
+const LEVEL_NAMES = { '1': 'Level 100', '2': 'Level 200', '3': 'Level 300', '4': 'Level 400' };
+function yearLabel(d, y) { return (d && d.group === 'special') ? LEVEL_NAMES[y] : YEAR_NAMES[y]; }
+function courseSem(c) { return (c && String(c.sem) === '2') ? '2' : '1'; }
+
 // ---------------- التوست (عرض رسائل بس) ----------------
 function showToast(msg, type) {
   type = type || 'info';
@@ -88,14 +327,10 @@ function normalizeState(s) {
 let state = defaultState();
 let dataReady = false;
 async function loadState() {
+  // SitesLoader الموحّد: fetch ← نسخة مدمجة ← شاشة تشخيص
   try {
-    const res = await fetch('data/sites.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    state = normalizeState(data);
-  } catch (e) {
-    console.warn('تعذّر تحميل data/sites.json:', e);
-    showToast('تعذّر تحميل ملف المحتوى data/sites.json — شغّل الموقع من سيرفر محلي مش من الملف مباشرة', 'error');
+    const pack = await window.SitesLoader.load();
+    if (pack) state = normalizeState(pack.data);
   } finally {
     dataReady = true;
   }
@@ -125,15 +360,18 @@ function deptCounts(deptId) {
 function parseRoute() {
   const hash = (window.location.hash || '').replace(/^#/, '');
   const parts = hash.split('/').filter(Boolean);
-  const route = { dept: null, year: '1', course: null };
+  const route = { dept: null, year: '1', term: null, course: null };
   if (parts.length && deptOf(parts[0])) {
     route.dept = parts[0];
     const d = deptOf(route.dept);
     if (d.noYears) {
       route.course = parts[1] || null;
     } else {
-      if (YEAR_ORDER.includes(parts[1])) { route.year = parts[1]; route.course = parts[2] || null; }
-      else if (parts[1]) { route.course = parts[1]; }
+      if (YEAR_ORDER.includes(parts[1])) {
+        route.year = parts[1];
+        if (TERM_ORDER.includes(parts[2])) { route.term = parts[2]; route.course = parts[3] || null; }
+        else { route.course = parts[2] || null; } // روابط قديمة بدون ترم — بتفضل شغالة
+      } else if (parts[1]) { route.course = parts[1]; }
     }
   }
   return route;
@@ -141,13 +379,14 @@ function parseRoute() {
 function goHome() { window.location.hash = ''; }
 function openDept(id) { window.location.hash = id; }
 function openYear(deptId, year) { window.location.hash = deptId + '/' + year; }
-function openCourse(dept, year, courseId) {
+function openTerm(deptId, year, term) { window.location.hash = deptId + '/' + year + '/' + term; }
+function openCourse(dept, year, term, courseId) {
   const d = deptOf(dept);
-  window.location.hash = d.noYears ? (dept + '/' + courseId) : (dept + '/' + year + '/' + courseId);
+  window.location.hash = d.noYears ? (dept + '/' + courseId) : (dept + '/' + year + '/' + term + '/' + courseId);
 }
-function closeCourseView(dept, year) {
+function closeCourseView(dept, year, term) {
   const d = deptOf(dept);
-  window.location.hash = d.noYears ? dept : (dept + '/' + year);
+  window.location.hash = d.noYears ? dept : (term ? (dept + '/' + year + '/' + term) : (dept + '/' + year));
 }
 window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
 
@@ -215,8 +454,8 @@ function renderHome() {
       headerHTML({ dept: null }) +
       '<main class="flex-1 max-w-7xl w-full mx-auto px-4 py-8">' +
         '<div class="text-center mb-10 fade-in">' +
-          '<h1 class="site-title text-3xl md:text-4xl font-black text-gray-800 dark:text-white mb-3">مكتبة مواد كلية هندسة</h1>' +
-          '<p class="text-gray-500 dark:text-gray-400 max-w-xl mx-auto">اختار القسم من البارتيشنز اللي تحت — كل اللينكات والملخصات والملاحظات اللي الأدمنز رافعينها هتلاقيها جوا البارتيشن</p>' +
+          '<h1 class="site-title text-3xl md:text-4xl font-black text-gray-800 dark:text-white mb-3">📚 مكتبة مواد كلية هندسة</h1>' +
+          '<p class="text-gray-500 dark:text-gray-400 max-w-xl mx-auto">اختار قسمك من الكروت اللي تحت — كل اللينكات والملخصات والملاحظات اللي الأدمنز رافعينها هتلاقيها جوه قسمك 💪</p>' +
         '</div>';
   groups.forEach(g => {
     const depts = DEPARTMENTS.filter(d => d.group === g);
@@ -256,7 +495,7 @@ function renderDept(deptId, year) {
           const n = getYearCourses(deptId, y).length;
           return '<button class="year-tab ' + (y === year ? 'active' : '') + '" onclick="openYear(\'' + deptId + '\',\'' + y + '\')">' +
             '<i class="fa ' + (y === '1' ? 'fa-1' : y === '2' ? 'fa-2' : y === '3' ? 'fa-3' : 'fa-4') + '"></i>' +
-            YEAR_NAMES[y] +
+            yearLabel(d, y) +
             '<span class="count">' + n + '</span>' +
           '</button>';
         }).join('') +
@@ -271,7 +510,7 @@ function renderDept(deptId, year) {
             '<div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"><i class="fa ' + d.icon + '"></i></div>' +
             '<div>' +
               '<h1 class="text-xl sm:text-2xl font-black">' + esc(d.name) + '</h1>' +
-              '<p class="text-white/80 text-sm mt-1">' + esc(d.desc || '') + (d.noYears ? ' • محتوى السنة الإعدادية كلها هنا' : 'اختار الفرقة من الشريط اللي تحت.') + '</p>' +
+              '<p class="text-white/80 text-sm mt-1">' + esc(d.desc || '') + (d.noYears ? ' • محتوى السنة الإعدادية كلها هنا' : ' • اختار ' + (d.group === 'special' ? 'المستوى' : 'الفرقة') + ' وشوفه متقسّم ترمين 👇') + '</p>' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -290,44 +529,96 @@ function renderDeptGrid() {
   const deptId = route.dept;
   const d = deptOf(deptId);
   const year = d.noYears ? '1' : route.year;
+  const term = d.noYears ? null : route.term;
   const all = getYearCourses(deptId, year);
   const q = (searchQuery || '').trim().toLowerCase();
-  const filtered = q ? all.filter(c => (c.title || '').toLowerCase().includes(q) || (c.doc || '').toLowerCase().includes(q)) : all;
-  const totalLinks = all.reduce((a, c) => a + (c.sections || []).reduce((b, s) => b + (s.links || []).length, 0), 0);
-  const galleries = all.filter(c => c.type === 'gallery').length;
+
+  /* ===== (أ) عرض كروت الترمين — أول ما تختار فرقة ===== */
+  if (!d.noYears && !term && !q) {
+    const termStats = (list) => ({
+      courses: list.filter(c => c.type !== 'gallery').length,
+      galleries: list.filter(c => c.type === 'gallery').length,
+      links: list.reduce((a, c) => a + (c.sections || []).reduce((b, s) => b + (s.links || []).length, 0), 0)
+    });
+    const termCard = (t, iconClass, grad) => {
+      const st = termStats(all.filter(c => courseSem(c) === t));
+      return '' +
+      '<div class="card-hover cursor-pointer group relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl" onclick="openTerm(\'' + deptId + '\',\'' + year + '\',\'' + t + '\')">' +
+        '<div class="h-2 bg-gradient-to-r ' + grad + '"></div>' +
+        '<div class="p-6">' +
+          '<div class="flex items-center gap-4 mb-4">' +
+            '<div class="w-14 h-14 bg-gradient-to-br ' + grad + ' rounded-2xl flex items-center justify-center text-white text-xl shadow-md flex-shrink-0"><i class="fa ' + iconClass + '"></i></div>' +
+            '<div class="min-w-0"><h3 class="font-black text-gray-800 dark:text-white text-lg leading-tight">' + TERM_NAMES[t] + '</h3>' +
+            '<p class="text-xs text-gray-400 mt-1 truncate">' + esc(yearLabel(d, year)) + ' • ' + esc(d.name) + '</p></div>' +
+          '</div>' +
+          '<div class="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500 border-t border-gray-100 dark:border-gray-700 pt-3">' +
+            '<span class="flex items-center gap-1"><i class="fa fa-book text-indigo-400"></i><span>' + st.courses + ' مادة</span></span>' +
+            '<span class="flex items-center gap-1"><i class="fa fa-images text-pink-400"></i><span>' + st.galleries + ' معرض</span></span>' +
+            '<span class="flex items-center gap-1"><i class="fa fa-link text-cyan-400"></i><span>' + st.links + ' رابط</span></span>' +
+            '<span class="mr-auto font-semibold text-indigo-500"><i class="fa fa-arrow-left ml-1"></i>عرض</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    };
+    area.innerHTML =
+      '<div class="fade-in">' +
+        '<div class="relative mb-6">' +
+          '<i class="fa fa-search absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 text-sm"></i>' +
+          '<input id="search-input" value="' + esc(searchQuery) + '" oninput="onSearchInput(this.value)" placeholder="🔍 ابحث في كل مواد ' + esc(yearLabel(d, year)) + '..." class="w-full pr-11 pl-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm">' +
+        '</div>' +
+        '<p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex items-center gap-2"><i class="fa fa-layer-group text-indigo-400"></i>' + esc(yearLabel(d, year)) + ' متقسّمة على ترمين — اختار الترم اللي عايزه 👇</p>' +
+        '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">' +
+          termCard('1', 'fa-1', 'from-indigo-500 to-purple-600') +
+          termCard('2', 'fa-2', 'from-emerald-500 to-teal-600') +
+        '</div>' +
+      '</div>';
+    return;
+  }
+
+  /* ===== (ب) عرض مواد ترم معيّن — أو اعدادي، أو نتائج بحث في كل الترمين ===== */
+  const scoped = (!d.noYears && term) ? all.filter(c => courseSem(c) === term) : all;
+  const filtered = q ? all.filter(c => (c.title || '').toLowerCase().includes(q) || (c.doc || '').toLowerCase().includes(q)) : scoped;
+  const totalLinks = scoped.reduce((a, c) => a + (c.sections || []).reduce((b, s) => b + (s.links || []).length, 0), 0);
+  const galleries = scoped.filter(c => c.type === 'gallery').length;
+  const scopeLabel = d.noYears ? d.name : (term ? (yearLabel(d, year) + ' — ' + TERM_NAMES[term]) : yearLabel(d, year));
 
   area.innerHTML =
     '<div class="fade-in">' +
-      '<div class="flex flex-col sm:flex-row gap-3 mb-6">' +
-        '<div class="relative flex-1">' +
-          '<i class="fa fa-search absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 text-sm"></i>' +
-          '<input id="search-input" value="' + esc(searchQuery) + '" oninput="onSearchInput(this.value)" placeholder="🔍 ابحث عن مادة أو معرض في ' + esc(d.noYears ? d.name : YEAR_NAMES[year]) + '..." class="w-full pr-11 pl-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm">' +
-        '</div>' +
+      '<div class="relative mb-6">' +
+        '<i class="fa fa-search absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 text-sm"></i>' +
+        '<input id="search-input" value="' + esc(searchQuery) + '" oninput="onSearchInput(this.value)" placeholder="🔍 ابحث عن مادة أو معرض في ' + esc(scopeLabel) + '..." class="w-full pr-11 pl-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm">' +
       '</div>' +
+      ((!d.noYears && term) ?
+        '<div class="flex items-center gap-2 mb-5 flex-wrap">' +
+          '<button onclick="openYear(\'' + deptId + '\',\'' + year + '\')" class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-indigo-500"><i class="fa fa-arrow-right"></i> كل الترمين</button>' +
+          '<span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1.5 rounded-xl"><i class="fa fa-' + term + ' ml-1"></i>' + esc(yearLabel(d, year)) + ' • ' + TERM_NAMES[term] + '</span>' +
+        '</div>'
+      : '') +
       '<div class="grid grid-cols-3 gap-3 mb-8">' +
-        [{ label: 'المواد', value: all.length - galleries, icon: 'fa-book', color: 'from-indigo-500 to-purple-600' },
+        [{ label: 'المواد', value: scoped.length - galleries, icon: 'fa-book', color: 'from-indigo-500 to-purple-600' },
          { label: 'المعارض', value: galleries, icon: 'fa-images', color: 'from-pink-500 to-rose-600' },
          { label: 'الروابط', value: totalLinks, icon: 'fa-link', color: 'from-emerald-500 to-teal-600' }]
         .map(s => '<div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700"><div class="w-9 h-9 bg-gradient-to-br ' + s.color + ' rounded-xl flex items-center justify-center text-white mb-2"><i class="fa ' + s.icon + ' text-sm"></i></div><div class="text-2xl font-bold text-gray-800 dark:text-white">' + s.value + '</div><div class="text-xs text-gray-500 dark:text-gray-400 font-medium">' + s.label + '</div></div>').join('') +
       '</div>' +
       (filtered.length === 0 ?
         '<div class="text-center py-20"><div class="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl text-gray-300"><i class="fa ' + (q ? 'fa-search' : 'fa-graduation-cap') + '"></i></div>' +
-        '<p class="text-gray-400 font-semibold text-lg">' + (q ? '❌ لا توجد نتائج' : '📚 لسه مفيش محتوى في ' + esc(d.noYears ? 'القسم' : YEAR_NAMES[year])) + '</p>' +
-        (!q ? '<p class="text-gray-400 text-sm mt-2">أدمن القسم لسه مارفعش حاجة هنا — ارجع له تاني قريب</p>' : '') +
+        '<p class="text-gray-400 font-semibold text-lg">' + (q ? '❌ لا توجد نتائج' : '📚 لسه مفيش محتوى في ' + esc(scopeLabel)) + '</p>' +
+        (!q ? '<p class="text-gray-400 text-sm mt-2">أدمن القسم لسه مارفعش حاجة هنا — ارجع له تاني قريب 😉</p>' : '') +
         '</div>'
       :
         '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">' +
-          filtered.map((c, i) => courseCardHTML(deptId, year, c, all.findIndex(x => x.id === c.id))).join('') +
+          filtered.map((c, i) => courseCardHTML(deptId, year, term || (d.noYears ? null : courseSem(c)), c, i)).join('') +
         '</div>'
       ) +
     '</div>';
 }
-function courseCardHTML(deptId, year, c, index) {
+
+function courseCardHTML(deptId, year, term, c, index) {
   const isGallery = c.type === 'gallery';
   const links = (c.sections || []).reduce((a, s) => a + (s.links || []).length, 0);
   const color = c.color || COURSE_COLORS[index % COURSE_COLORS.length];
   return '' +
-  '<div class="card-hover cursor-pointer group relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl" onclick="openCourse(\'' + deptId + '\',\'' + year + '\',\'' + c.id + '\')">' +
+  '<div class="card-hover cursor-pointer group relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl" onclick="openCourse(\'' + deptId + '\',\'' + year + '\',\'' + (term || courseSem(c)) + '\',\'' + c.id + '\')">' +
     '<div class="h-2 bg-gradient-to-r ' + color + '"></div>' +
     '<div class="p-5">' +
       '<div class="flex items-start justify-between mb-4">' +
@@ -409,7 +700,7 @@ function renderCourse(deptId, year, courseId) {
     '<div class="min-h-screen flex flex-col transition-colors duration-300 ' + (darkMode ? 'dark bg-gray-950' : 'bg-gray-50') + ' dot-pattern">' +
       headerHTML({ dept: deptId, course: courseId }) +
       '<main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6">' +
-        '<button onclick="closeCourseView(\'' + deptId + '\',\'' + year + '\')" class="flex items-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-500 mb-4"><i class="fa fa-arrow-right"></i> رجوع لـ ' + esc((deptOf(deptId) || {}).name || '') + '</button>' +
+        '<button onclick="closeCourseView(\'' + deptId + '\',\'' + year + '\',\'' + courseSem(c) + '\')" class="flex items-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-500 mb-4"><i class="fa fa-arrow-right"></i> رجوع لـ ' + esc((deptOf(deptId) || {}).name || '') + '</button>' +
         '<div class="rounded-3xl p-6 mb-6 bg-gradient-to-r ' + color + ' text-white shadow-lg fade-in">' +
           '<div class="flex items-center gap-4 min-w-0">' +
             '<div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-2xl overflow-hidden flex-shrink-0">' + (c.image ? '<img src="' + esc(c.image) + '" class="w-full h-full object-cover" alt="">' : '<i class="fa ' + (c.icon || 'fa-book') + '"></i>') + '</div>' +
@@ -443,7 +734,7 @@ function renderGallery(deptId, year, c) {
     '<div class="min-h-screen flex flex-col transition-colors duration-300 ' + (darkMode ? 'dark bg-gray-950' : 'bg-gray-50') + ' dot-pattern">' +
       headerHTML({ dept: deptId, course: c.id }) +
       '<main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6">' +
-        '<button onclick="closeCourseView(\'' + deptId + '\',\'' + year + '\')" class="flex items-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-500 mb-4"><i class="fa fa-arrow-right"></i> رجوع</button>' +
+        '<button onclick="closeCourseView(\'' + deptId + '\',\'' + year + '\',\'' + courseSem(c) + '\')" class="flex items-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-500 mb-4"><i class="fa fa-arrow-right"></i> رجوع</button>' +
         '<div class="rounded-3xl p-6 mb-6 bg-gradient-to-r ' + color + ' text-white shadow-lg fade-in">' +
           '<div class="flex items-center gap-4">' +
             '<div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-2xl overflow-hidden flex-shrink-0">' + (c.image ? '<img src="' + esc(c.image) + '" class="w-full h-full object-cover" alt="">' : '<i class="fa fa-images"></i>') + '</div>' +
@@ -498,7 +789,7 @@ function render() {
   const year = d.noYears ? '1' : route.year;
   if (route.course) {
     const c = findCourse(route.dept, year, route.course);
-    if (!c) { closeCourseView(route.dept, year); return; }
+    if (!c) { closeCourseView(route.dept, year, route.term); return; }
     renderCourse(route.dept, year, route.course);
   } else {
     renderDept(route.dept, year);
