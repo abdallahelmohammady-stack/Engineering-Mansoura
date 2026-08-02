@@ -1,7 +1,7 @@
 {
   "app": "eng-materials",
   "version": 1,
-  "exportedAt": 1785647280229,
+  "exportedAt": 1785666210338,
   "exportedBy": "abdallah",
   "departments": {
     "prep": {
@@ -1750,6 +1750,95 @@
         "3": [],
         "4": []
       }
+    },
+    "bio": {
+      "years": {
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": []
+      }
+    },
+    "energy": {
+      "years": {
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": []
+      }
+    },
+    "biomed": {
+      "years": {
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": []
+      }
+    },
+    "biomedical": {
+      "years": {
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": []
+      }
     }
-  }
+  },
+  "customDepts": [
+    {
+      "id": "bio",
+      "name": "الهندسة الطبية",
+      "group": "general",
+      "icon": "flask",
+      "color": "from-amber-500 to-orange-600",
+      "desc": "",
+      "welcome": ""
+    },
+    {
+      "id": "energy",
+      "name": "طاقه متجدده",
+      "group": "special",
+      "icon": "car",
+      "color": "from-orange-500 to-red-500",
+      "desc": "",
+      "welcome": ""
+    },
+    {
+      "id": "biomed",
+      "name": "الهندسة الطبية والحيوية",
+      "group": "general",
+      "icon": "scope",
+      "color": "from-pink-500 to-rose-600",
+      "desc": "",
+      "welcome": ""
+    },
+    {
+      "id": "biomedical",
+      "name": "هندسة طبية وحيوية",
+      "group": "special",
+      "icon": "scope",
+      "color": "from-orange-500 to-red-500",
+      "desc": "",
+      "welcome": ""
+    }
+  ],
+  "deptOverrides": {},
+  "deptOrder": [
+    "prep",
+    "comm",
+    "power",
+    "mech",
+    "prod",
+    "arch",
+    "civil",
+    "commcomp",
+    "mechat",
+    "ai",
+    "biomedical",
+    "energy"
+  ],
+  "deletedDepts": [
+    "bio",
+    "biomed"
+  ]
 }
