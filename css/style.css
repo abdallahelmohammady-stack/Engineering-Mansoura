@@ -431,3 +431,12 @@ button:active{transform:scale(.97)}
   .bp-ring .bp-rfg{transition:none}
   .bp-cur{display:none}
 }
+
+/* -----------------------------------------------------------
+   🛠️ أزرار إدارة القسم على الكرت (تعديل/تقديم/تأخير/حذف — سوبر أدمن)
+   ----------------------------------------------------------- */
+.bp-dacts{display:flex;gap:.32rem;flex-wrap:wrap;justify-content:flex-end;max-width:8.5rem}
+.bp-dact{width:1.75rem;height:1.75rem;display:inline-flex;align-items:center;justify-content:center;border-radius:9px;font-size:.72rem;border:1px solid var(--el-line);background:var(--el-panel);color:var(--el-ink-soft);cursor:pointer;transition:all .22s ease;padding:0}
+.bp-dact:hover{border-color:var(--el-accent);color:var(--el-accent);background:var(--el-accent-soft);transform:translateY(-1px)}
+.bp-dact.bp-deptedit{border-color:color-mix(in srgb,var(--el-mark) 45%,transparent);color:var(--el-mark);background:color-mix(in srgb,var(--el-mark) 10%,transparent)}
+.bp-dact.danger:hover{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.10)}
