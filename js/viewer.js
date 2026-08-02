@@ -312,7 +312,7 @@ function defaultState() {
     else YEAR_ORDER.forEach(y => { years[y] = []; });
     departments[d.id] = { years: years };
   });
-  return { departments: departments, customDepts: [] };
+  return { departments: departments, customDepts: [], deptOverrides: {}, hiddenDepts: [], deptOrder: [] };
 }
 function normalizeState(s) {
   const base = defaultState();
@@ -338,6 +338,39 @@ function normalizeState(s) {
       base.departments[cd.id] = { years: out };
     });
   }
+  /* تفضيلات إدارة الأقسام (تعديل/ترتيب/حذف) — بتتصدّر مع sites.json */
+  if (s && s.deptOverrides && typeof s.deptOverrides === 'object') {
+    Object.keys(s.deptOverrides).forEach(function(k) {
+      if (!DEPARTMENTS.some(function(d) { return d.id === k; })) return;
+      const o = s.deptOverrides[k] || {};
+      const clean = {};
+      ['name', 'desc', 'welcome', 'icon', 'color'].forEach(function(f) {
+        if (typeof o[f] === 'string' && o[f].trim()) clean[f] = o[f];
+      });
+      if (Object.keys(clean).length) base.deptOverrides[k] = clean;
+    });
+  }
+  /* الأقسام المخفية نهائياً — مش سلة محذوفات. بنقرا الاسمين (الجديد + القديم)
+     ونمسح أي بقايا داتا للأقسام المخفية عشان ملفات التصدير القديمة تتنضّف لوحدها */
+  const hiddenMerge = [];
+  [s.hiddenDepts, s.deletedDepts].forEach(function(arr) {
+    if (!Array.isArray(arr)) return;
+    arr.forEach(function(x) { if (typeof x === 'string' && hiddenMerge.indexOf(x) === -1) hiddenMerge.push(x); });
+  });
+  hiddenMerge.forEach(function(x) {
+    if (base.departments[x]) delete base.departments[x];
+    if (base.deptOverrides[x]) delete base.deptOverrides[x];
+  });
+  base.customDepts = base.customDepts.filter(function(cd) { return hiddenMerge.indexOf(cd.id) === -1; });
+  base.hiddenDepts = hiddenMerge.filter(function(x) {
+    return DEPARTMENTS.some(function(d) { return d.id === x; });
+  });
+  if (Array.isArray(s.deptOrder)) {
+    base.deptOrder = s.deptOrder.filter(function(x, ix, arr) {
+      return typeof x === 'string' && arr.indexOf(x) === ix &&
+        (DEPARTMENTS.some(function(d) { return d.id === x; }) || base.customDepts.some(function(cd) { return cd.id === x; }));
+    });
+  }
   return base;
 }
 let state = defaultState();
@@ -351,7 +384,31 @@ async function loadState() {
     dataReady = true;
   }
 }
-function allDepts() { return DEPARTMENTS.concat((state && state.customDepts) || []); }
+/* إدارة الأقسام: overrides (تعديل بيانات الأساسية) + إخفاء نهائي + ترتيب مخصص */
+function isDeptHidden(id) { return ((state && state.hiddenDepts) || []).indexOf(id) !== -1; }
+function withOverride(d) {
+  const o = ((state && state.deptOverrides) || {})[d.id];
+  if (!o) return d;
+  const m = Object.assign({}, d);
+  ['name', 'desc', 'welcome', 'icon', 'color'].forEach(function(k) {
+    if (typeof o[k] === 'string' && o[k].trim()) m[k] = o[k];
+  });
+  return m;
+}
+function allDepts() {
+  const list = DEPARTMENTS.concat(((state && state.customDepts) || []))
+    .filter(function(d) { return !isDeptHidden(d.id); })
+    .map(withOverride);
+  const ord = (state && Array.isArray(state.deptOrder)) ? state.deptOrder : [];
+  return list.map(function(d, i) { return { d: d, i: i }; })
+    .sort(function(a, b) {
+      if (a.d.group !== b.d.group) return a.i - b.i; /* الجروب ثابت — الترتيب جواه بس */
+      const ka = ord.indexOf(a.d.id), kb = ord.indexOf(b.d.id);
+      const va = ka < 0 ? 9999 : ka, vb = kb < 0 ? 9999 : kb;
+      return va === vb ? a.i - b.i : va - vb;
+    })
+    .map(function(x) { return x.d; });
+}
 function deptOf(id) { return allDepts().find(d => d.id === id); }
 function getYearCourses(deptId, year) {
   const d = state.departments[deptId];
