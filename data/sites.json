@@ -1,8 +1,8 @@
 {
   "app": "eng-materials",
   "version": 1,
-  "exportedAt": 1785567243510,
-  "exportedBy": "super",
+  "exportedAt": 1785647169601,
+  "exportedBy": "abdallah",
   "departments": {
     "prep": {
       "years": {
@@ -1729,7 +1729,21 @@
     },
     "commcomp": {
       "years": {
-        "1": [],
+        "1": [
+          {
+            "id": "id-1785647132450-ypvg9pxcc",
+            "title": "math 3",
+            "doc": "",
+            "icon": "fa-calculator",
+            "color": "from-green-500 to-emerald-600",
+            "image": "",
+            "type": "course",
+            "sem": "1",
+            "sections": [],
+            "notes": [],
+            "images": []
+          }
+        ],
         "2": [],
         "3": [],
         "4": []
