@@ -227,7 +227,7 @@
 })();
 
 /* ============================================================
-   مكتبة مواد كلية هندسة — نسخة الزوّار (viewer.js)
+   مكتبة مواد كلية الهندسة — نسخة الزوّار (viewer.js)
    ------------------------------------------------------------
    عرض فقط: مفيش هنا أي تعديل أو تسجيل دخول.
    المحتوى بيتقرا من data/sites.json (اللي بينزل من زر "تصدير"
@@ -312,7 +312,7 @@ function defaultState() {
     else YEAR_ORDER.forEach(y => { years[y] = []; });
     departments[d.id] = { years: years };
   });
-  return { departments: departments };
+  return { departments: departments, customDepts: [] };
 }
 function normalizeState(s) {
   const base = defaultState();
@@ -328,6 +328,16 @@ function normalizeState(s) {
       base.departments[d.id] = { years: outYears };
     }
   });
+  /* أقسام مخصوصة ضافها السوبر أدمن واتصدّرت مع البيانات */
+  if (Array.isArray(s.customDepts)) {
+    base.customDepts = s.customDepts.filter(cd => cd && cd.id && cd.name && !DEPARTMENTS.some(d => d.id === cd.id));
+    base.customDepts.forEach(cd => {
+      const cy = deps[cd.id];
+      const out = {};
+      YEAR_ORDER.forEach(y => { out[y] = (cy && cy.years && Array.isArray(cy.years[y])) ? cy.years[y] : []; });
+      base.departments[cd.id] = { years: out };
+    });
+  }
   return base;
 }
 let state = defaultState();
@@ -341,7 +351,8 @@ async function loadState() {
     dataReady = true;
   }
 }
-function deptOf(id) { return DEPARTMENTS.find(d => d.id === id); }
+function allDepts() { return DEPARTMENTS.concat((state && state.customDepts) || []); }
+function deptOf(id) { return allDepts().find(d => d.id === id); }
 function getYearCourses(deptId, year) {
   const d = state.departments[deptId];
   if (!d || !d.years) return [];
@@ -422,19 +433,130 @@ function toggleDark() {
   applyDark(); render();
 }
 
+// ---------------- تتبع التقدم (Progress Tracking — بيتحفظ في متصفح الزائر) ----------------
+const PROGRESS_KEY = 'eng_progress_v1';
+let progress = { links: {}, courses: {} };
+try {
+  const rawP = localStorage.getItem(PROGRESS_KEY);
+  if (rawP) { const p = JSON.parse(rawP); progress = { links: p.links || {}, courses: p.courses || {} }; }
+} catch (e) {}
+function saveProgress() { try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); } catch (e) {} }
+function findCourseById(cid) {
+  const deps = (state && state.departments) || {};
+  for (const did in deps) {
+    for (const y in deps[did].years) {
+      const c = (deps[did].years[y] || []).find(x => x.id === cid);
+      if (c) return c;
+    }
+  }
+  return null;
+}
+function linkStats(c) {
+  let total = 0, done = 0;
+  (c.sections || []).forEach(s => (s.links || []).forEach(l => { total++; if (progress.links[l.id]) done++; }));
+  return { total: total, done: done };
+}
+function coursePct(c) {
+  const st = linkStats(c);
+  if (st.total > 0) return st.done / st.total;
+  return progress.courses[c.id] ? 1 : 0;
+}
+function courseIsDone(c) { return coursePct(c) >= 1 && true; }
+function aggStats(list) {
+  const total = list.length;
+  let done = 0;
+  list.forEach(c => { if (courseIsDone(c)) done++; });
+  return { total: total, done: done, pct: total ? done / total : 0 };
+}
+function deptAgg(deptId) {
+  const dep = ((state || {}).departments || {})[deptId];
+  if (!dep) return { total: 0, done: 0, pct: 0 };
+  let all = [];
+  Object.keys(dep.years || {}).forEach(y => { all = all.concat(dep.years[y] || []); });
+  return aggStats(all);
+}
+function toggleLink(id) {
+  if (progress.links[id]) delete progress.links[id]; else progress.links[id] = true;
+  saveProgress(); refreshProgressUI();
+}
+function toggleCourseDone(id) {
+  if (progress.courses[id]) delete progress.courses[id]; else progress.courses[id] = true;
+  saveProgress(); refreshProgressUI();
+}
+function resetCourseProgress(cid) {
+  const c = findCourseById(cid);
+  delete progress.courses[cid];
+  if (c) (c.sections || []).forEach(s => (s.links || []).forEach(l => delete progress.links[l.id]));
+  saveProgress(); refreshProgressUI();
+  showToast('تم مسح تقدمك في المادة دي', 'info');
+}
+const RING_C = (2 * Math.PI * 13).toFixed(1);
+function ringHTML(pct, label) {
+  pct = Math.max(0, Math.min(1, pct || 0));
+  const off = (RING_C * (1 - pct)).toFixed(1);
+  return '<span class="bp-ring' + (pct >= 1 ? ' bp-full' : '') + '">' +
+    '<svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">' +
+    '<circle class="bp-rbg" cx="16" cy="16" r="13"/>' +
+    '<circle class="bp-rfg" cx="16" cy="16" r="13" stroke-dasharray="' + RING_C + '" stroke-dashoffset="' + off + '"/>' +
+    '</svg>' + (label ? '<span class="bp-rlab">' + label + '</span>' : '') + '</span>';
+}
+/* إعادة رسم عناصر التقدم في الصفحة الحالية — من غير render كامل عشان السكرول ميتحركش */
+function refreshProgressUI() {
+  const rootEl = document.getElementById('root');
+  if (!rootEl) return;
+  rootEl.querySelectorAll('[data-pjl]').forEach(row => {
+    const on = !!progress.links[row.getAttribute('data-pjl')];
+    row.classList.toggle('bp-done', on);
+    const box = row.querySelector('.bp-check');
+    if (box) box.classList.toggle('bp-on', on);
+  });
+  rootEl.querySelectorAll('[data-pjc]').forEach(el => {
+    const c = findCourseById(el.getAttribute('data-pjc'));
+    if (!c) return;
+    const st = linkStats(c);
+    el.innerHTML = ringHTML(coursePct(c), st.total ? (st.done + '/' + st.total) : '');
+    el.classList.toggle('bp-full', coursePct(c) >= 1);
+  });
+  rootEl.querySelectorAll('[data-pjt]').forEach(el => {
+    const parts = el.getAttribute('data-pjt').split('|');
+    const list = getYearCourses(parts[0], parts[1]).filter(cc => courseSem(cc, parts[0]) === parts[2]);
+    const s = aggStats(list);
+    el.innerHTML = ringHTML(s.pct, s.done + '/' + s.total);
+    el.classList.toggle('bp-full', s.pct >= 1 && s.total > 0);
+  });
+  rootEl.querySelectorAll('[data-pjd]').forEach(el => {
+    const s = deptAgg(el.getAttribute('data-pjd'));
+    if (el.getAttribute('data-pjf') === 'bar') {
+      const i = el.querySelector('i');
+      if (i) i.style.width = (s.pct * 100).toFixed(0) + '%';
+      el.title = s.done + '/' + s.total + ' مكتملة';
+      el.classList.toggle('bp-full', s.pct >= 1 && s.total > 0);
+    } else {
+      el.textContent = s.done + '/' + s.total + ' مكتملة · ' + Math.round(s.pct * 100) + '%';
+      el.classList.toggle('bp-full', s.pct >= 1 && s.total > 0);
+    }
+  });
+  rootEl.querySelectorAll('[data-pjm]').forEach(btn => {
+    const on = !!progress.courses[btn.getAttribute('data-pjm')];
+    btn.classList.toggle('bp-on', on);
+    btn.innerHTML = on ? '<i class="fa fa-check"></i> مكتملة' : '<i class="fa fa-check"></i> علّمها كمكتملة';
+  });
+}
+
 // ---------------- أجزاء مشتركة ----------------
 let courseTitleCache = '';
 function headerHTML(route) {
   const dept = route.dept ? deptOf(route.dept) : null;
-  const title = route.course && dept ? courseTitleCache : (dept ? dept.name : 'مكتبة مواد كلية هندسة');
+  const title = route.course && dept ? courseTitleCache : (dept ? dept.name : 'مكتبة مواد كلية الهندسة');
   return '' +
   '<header class="sticky top-0 z-50 glass border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80">' +
     '<div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-2 sm:gap-4">' +
       '<div class="flex items-center gap-2 min-w-0">' +
         (dept ? '<button onclick="goHome()" title="كل الأقسام" class="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400"><i class="fa fa-arrow-right"></i></button>' : '') +
         '<div class="flex items-center gap-2 min-w-0">' +
-          '<div class="w-9 h-9 flex-shrink-0 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white"><i class="fa ' + (dept ? dept.icon : 'fa-graduation-cap') + ' text-sm"></i></div>' +
-          '<div class="min-w-0"><h1 class="text-sm sm:text-base font-bold text-gray-800 dark:text-white leading-tight truncate">' + esc(title) + '</h1>' +
+          '<div class="w-9 h-9 flex-shrink-0 rounded-lg flex items-center justify-center bp-tile3d" style="background:var(--bp-accent);font-size:1.05rem">' + iconSVG(dept ? dept.icon : 'fa-graduation-cap') + '</div>' +
+          '<div class="min-w-0"><p class="bp-micro" style="margin-bottom:-2px">MATERIALS INDEX · SEC/' + (dept ? dept.id.toUpperCase() : 'ALL') + '</p>' +
+          '<h1 class="text-sm sm:text-base font-bold text-gray-800 dark:text-white leading-tight truncate">' + esc(title) + '</h1>' +
           '<p class="text-xs text-gray-400 dark:text-gray-500 hidden sm:block">مواد كل الأقسام — عام وبرامج نوعية 🎓</p></div>' +
         '</div>' +
       '</div>' +
@@ -443,16 +565,25 @@ function headerHTML(route) {
   '</header>';
 }
 function footerHTML() {
-  return '<footer class="mt-auto text-center py-4 text-xs text-gray-400 dark:text-gray-600 border-t border-gray-100 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 glass"><span>made by abdallah elmohammady</span></footer>';
+  return '<footer class="mt-auto text-center py-4 text-xs text-gray-400 dark:text-gray-600 border-t border-gray-100 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 glass">' +
+    '<p class="bp-micro" style="margin-bottom:4px">ENG · MANS · BLUEPRINT EDITION</p>' +
+    '<span>made by abdallah elmohammady</span></footer>';
 }
-function deptCardHTML(d, counts) {
+function deptCardHTML(d, counts, i) {
+  const idx = ('0' + (allDepts().indexOf(d) + 1)).slice(-2);
+  const tilt = (i || 0) % 2 === 0 ? ' bp-tilt-l' : ' bp-tilt-r';
+  const _a = deptAgg(d.id);
   return '' +
-  '<div class="card-hover cursor-pointer group relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl" onclick="openDept(\'' + d.id + '\')">' +
-    '<div class="h-2 bg-gradient-to-r ' + d.color + '"></div>' +
+  '<div class="card-hover bp-card' + tilt + ' cursor-pointer group relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl bp-reveal" style="--i:' + (i || 0) + '" onclick="openDept(\'' + d.id + '\')">' +
+    '<span class="bp-crop tl"></span><span class="bp-crop tr"></span><span class="bp-crop bl"></span><span class="bp-crop br"></span>' +
+    '<div class="h-1.5 bg-gradient-to-r ' + d.color + '"></div>' +
     '<div class="p-5">' +
       '<div class="flex items-start justify-between mb-4">' +
-        '<div class="w-12 h-12 bg-gradient-to-br ' + d.color + ' rounded-2xl flex items-center justify-center text-white text-xl shadow-md"><i class="fa ' + d.icon + '"></i></div>' +
-        (d.noYears ? '<span class="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full font-medium">سنة إعدادية</span>' : '') +
+        '<div class="w-12 h-12 bg-gradient-to-br ' + d.color + ' bp-tile3d rounded-xl flex items-center justify-center text-xl shadow-md">' + iconSVG(d.icon) + '</div>' +
+        '<div class="flex flex-col items-end gap-1">' +
+          '<span class="bp-micro" dir="ltr">SEC/' + idx + '</span>' +
+          (d.noYears ? '<span class="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full font-medium">سنة إعدادية</span>' : '') +
+        '</div>' +
       '</div>' +
       '<h3 class="font-bold text-gray-800 dark:text-white text-base leading-tight mb-1">' + esc(d.name) + '</h3>' +
       '<p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">' + esc(d.desc || '') + '</p>' +
@@ -461,6 +592,7 @@ function deptCardHTML(d, counts) {
         '<span class="flex items-center gap-1"><i class="fa fa-link text-cyan-400"></i><span>' + counts.links + ' رابط</span></span>' +
         (counts.courses === 0 ? '<span class="mr-auto text-amber-500 font-semibold">قريباً…</span>' : '') +
       '</div>' +
+      '<span class="bp-minibar' + (_a.pct >= 1 && _a.total ? ' bp-full' : '') + '" data-pjd="' + d.id + '" data-pjf="bar" title="' + _a.done + '/' + _a.total + ' مكتملة"><i style="width:' + (_a.pct * 100).toFixed(0) + '%"></i></span>' +
     '</div>' +
   '</div>';
 }
@@ -472,21 +604,29 @@ function renderHome() {
     '<div class="min-h-screen flex flex-col transition-colors duration-300 ' + (darkMode ? 'dark bg-gray-950' : 'bg-gray-50') + ' dot-pattern">' +
       headerHTML({ dept: null }) +
       '<main class="flex-1 max-w-7xl w-full mx-auto px-4 py-8">' +
-        '<div class="text-center mb-10 fade-in">' +
-          '<h1 class="site-title text-3xl md:text-4xl font-black text-gray-800 dark:text-white mb-3">مكتبة مواد كلية هندسة</h1>' +
-          '<p class="text-gray-500 dark:text-gray-400 max-w-xl mx-auto">اختار القسم من البارتيشنز اللي تحت — كل اللينكات والملخصات والملاحظات اللي الأدمنز رافعينها هتلاقيها جوا البارتيشن الخاص بيها </p>' +
+        '<div class="mb-10 bp-reveal bp-panel-frame relative overflow-hidden px-6 py-8 sm:px-10" style="--i:0">' +
+          '<span class="bp-crop tl"></span><span class="bp-crop tr"></span><span class="bp-crop bl"></span><span class="bp-crop br"></span>' +
+          '<p class="bp-micro">MANSOURA ENGINEERING · MATERIALS BLUEPRINT · V2</p>' +
+          '<h1 class="site-title text-3xl md:text-5xl font-black text-gray-800 dark:text-white mt-2 mb-4">مكتبة مواد <span class="bp-title-mark">كلية الهندسة</span></h1>' +
+          '<p class="text-gray-500 dark:text-gray-400 max-w-xl">اختار القسم من البارتيشنز اللي تحت، كل اللينكات والملخصات والملاحظات اللي الأدمنز رافعينها هتلاقيها جوا البارتيشن الخاص بيها</p>' +
+          '<div class="flex flex-wrap gap-2 mt-5">' +
+            '<span class="bp-chip" dir="ltr">' + allDepts().length + ' DEPTS</span>' +
+            '<span class="bp-chip">ترمين لكل فرقة</span>' +
+            '<span class="bp-chip">تابع تقدمك بالحلقات</span>' +
+          '</div>' +
         '</div>';
-  groups.forEach(g => {
-    const depts = DEPARTMENTS.filter(d => d.group === g);
+  groups.forEach((g, gi) => {
+    const depts = allDepts().filter(d => d.group === g);
     html +=
-      '<div class="mb-10 fade-in">' +
+      '<div class="mb-10 bp-reveal" style="--i:' + (gi + 1) + '">' +
         '<div class="flex items-center gap-3 mb-5">' +
           '<div class="w-9 h-9 bg-gradient-to-br ' + (g === 'general' ? 'from-indigo-500 to-purple-600' : 'from-pink-500 to-rose-600') + ' rounded-xl flex items-center justify-center text-white"><i class="fa ' + (g === 'general' ? 'fa-building-columns' : 'fa-certificate') + ' text-sm"></i></div>' +
           '<h2 class="text-xl font-black text-gray-800 dark:text-white">' + GROUP_NAMES[g] + '</h2>' +
+          '<span class="bp-micro" dir="ltr">' + (g === 'general' ? 'BLOCK / A' : 'BLOCK / B') + '</span>' +
           '<span class="text-xs text-gray-400 font-semibold">' + depts.length + ' قسم</span>' +
         '</div>' +
         '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">' +
-          depts.map(d => deptCardHTML(d, deptCounts(d.id))).join('') +
+          depts.map((d, di) => deptCardHTML(d, deptCounts(d.id), gi * 4 + di)).join('') +
         '</div>' +
       '</div>';
   });
@@ -505,6 +645,8 @@ function onSearchInput(v) {
 function renderDept(deptId, year) {
   const d = deptOf(deptId);
   if (d.noYears) year = '1';
+  const __di = ('0' + (allDepts().indexOf(d) + 1)).slice(-2);
+  const __a = deptAgg(deptId);
   const years = d.noYears ? ['1'] : YEAR_ORDER;
   let yearBar = '';
   if (!d.noYears) {
@@ -524,12 +666,19 @@ function renderDept(deptId, year) {
     '<div class="min-h-screen flex flex-col transition-colors duration-300 ' + (darkMode ? 'dark bg-gray-950' : 'bg-gray-50') + ' dot-pattern">' +
       headerHTML({ dept: deptId }) +
       '<main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6">' +
-        '<div class="rounded-3xl p-6 mb-6 bg-gradient-to-r ' + d.color + ' text-white shadow-lg fade-in">' +
-          '<div class="flex items-center gap-4">' +
-            '<div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"><i class="fa ' + d.icon + '"></i></div>' +
+        '<div class="relative overflow-hidden bp-panel-frame bp-reveal p-6 mb-6 shadow-lg" style="--i:0">' +
+          '<span class="bp-crop tl"></span><span class="bp-crop tr"></span><span class="bp-crop bl"></span><span class="bp-crop br"></span>' +
+          '<span class="bp-ghost" style="font-size:7rem;top:-16px;inset-inline-end:8px" dir="ltr">' + __di + '</span>' +
+          '<p class="bp-micro">SEC/' + __di + ' · ' + (d.group === 'special' ? 'SPECIAL PROGRAM' : 'GENERAL DEPT') + ' · MANSOURA ENG</p>' +
+          '<div class="flex items-center gap-4 mt-3 relative">' +
+            '<div class="w-14 h-14 bp-tile3d rounded-xl flex items-center justify-center text-3xl flex-shrink-0 shadow-md bg-gradient-to-br ' + d.color + '">' + iconSVG(d.icon) + '</div>' +
             '<div>' +
               '<h1 class="text-xl sm:text-2xl font-black">' + esc(d.name) + '</h1>' +
-              '<p class="text-white/80 text-sm mt-1">' + esc(d.desc || '') + (d.noYears ? ' • مواد اعدادي مقسّمة على ترمين' : ' • اختار ' + (d.group === 'special' ? 'المستوى' : 'الفرقة') + ' وشوفه متقسّم ترمين') + '</p>' +
+              '<p class="text-sm mt-1" style="color:var(--bp-ink-soft)">' + esc(d.desc || '') + (d.noYears ? ' • مواد اعدادي مقسّمة على ترمين' : ' • اختار ' + (d.group === 'special' ? 'المستوى' : 'الفرقة') + ' وشوفه متقسّم ترمين') + '</p>' +
+              (d.welcome ? '<p class="bp-welcome">' + esc(d.welcome) + '</p>' : '') +
+            '</div>' +
+            '<div class="mr-auto flex-shrink-0 hidden sm:flex">' +
+              '<span class="bp-chip' + (__a.pct >= 1 && __a.total ? ' bp-full' : '') + '" data-pjd="' + d.id + '" data-pjf="chip">' + __a.done + '/' + __a.total + ' مكتملة · ' + Math.round(__a.pct * 100) + '%</span>' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -560,15 +709,20 @@ function renderDeptGrid() {
       links: list.reduce((a, c) => a + (c.sections || []).reduce((b, s) => b + (s.links || []).length, 0), 0)
     });
     const termCard = (t, iconClass, grad) => {
-      const st = termStats(all.filter(c => courseSem(c, deptId) === t));
+      const scoped = all.filter(c => courseSem(c, deptId) === t);
+      const st = termStats(scoped);
+      const s2 = aggStats(scoped);
       return '' +
-      '<div class="card-hover cursor-pointer group relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl" onclick="openTerm(\'' + deptId + '\',\'' + year + '\',\'' + t + '\')">' +
-        '<div class="h-2 bg-gradient-to-r ' + grad + '"></div>' +
-        '<div class="p-6">' +
-          '<div class="flex items-center gap-4 mb-4">' +
-            '<div class="w-14 h-14 bg-gradient-to-br ' + grad + ' rounded-2xl flex items-center justify-center text-white text-xl shadow-md flex-shrink-0"><i class="fa ' + iconClass + '"></i></div>' +
-            '<div class="min-w-0"><h3 class="font-black text-gray-800 dark:text-white text-lg leading-tight">' + TERM_NAMES[t] + '</h3>' +
+      '<div class="card-hover bp-card ' + (t === '1' ? 'bp-tilt-l' : 'bp-tilt-r') + ' cursor-pointer group relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl" onclick="openTerm(\'' + deptId + '\',\'' + year + '\',\'' + t + '\')">' +
+        '<span class="bp-crop tl"></span><span class="bp-crop tr"></span><span class="bp-crop bl"></span><span class="bp-crop br"></span>' +
+        '<span class="bp-ghost" style="font-size:6.5rem;bottom:-18px;inset-inline-end:6px" dir="ltr">0' + t + '</span>' +
+        '<div class="h-1.5 bg-gradient-to-r ' + grad + '"></div>' +
+        '<div class="p-6 relative">' +
+          '<p class="bp-micro" dir="ltr">PLATE 0' + t + (d.noYears ? ' · PREP' : (' · YR/0' + year)) + '</p>' +
+          '<div class="flex items-center gap-4 mt-2 mb-4">' +
+            '<div class="min-w-0 flex-1"><h3 class="font-black text-gray-800 dark:text-white text-xl leading-tight">' + TERM_NAMES[t] + '</h3>' +
             '<p class="text-xs text-gray-400 mt-1 truncate">' + (d.noYears ? esc(d.name) : esc(yearLabel(d, year)) + ' • ' + esc(d.name)) + '</p></div>' +
+            '<span data-pjt="' + deptId + '|' + year + '|' + t + '" class="' + (s2.pct >= 1 && s2.total ? 'bp-full' : '') + '">' + ringHTML(s2.pct, s2.done + '/' + s2.total) + '</span>' +
           '</div>' +
           '<div class="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500 border-t border-gray-100 dark:border-gray-700 pt-3">' +
             '<span class="flex items-center gap-1"><i class="fa fa-book text-indigo-400"></i><span>' + st.courses + ' مادة</span></span>' +
@@ -583,7 +737,7 @@ function renderDeptGrid() {
       '<div class="fade-in">' +
         '<div class="relative mb-6">' +
           '<i class="fa fa-search absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 text-sm"></i>' +
-          '<input id="search-input" value="' + esc(searchQuery) + '" oninput="onSearchInput(this.value)" placeholder="🔍 ابحث في كل مواد ' + esc(yearLabel(d, year)) + '..." class="w-full pr-11 pl-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm">' +
+          '<input id="search-input" value="' + esc(searchQuery) + '" oninput="onSearchInput(this.value)" placeholder="🔍 ابحث في كل مواد ' + esc(yearLabel(d, year)) + '..." class="w-full pr-11 pl-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm bp-search">' +
         '</div>' +
         '<p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex items-center gap-2"><i class="fa fa-layer-group text-indigo-400"></i>' + esc(d.noYears ? d.name : yearLabel(d, year)) + ' متقسّمة على ترمين — اختار الترم اللي عايزه</p>' +
         '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">' +
@@ -605,7 +759,7 @@ function renderDeptGrid() {
     '<div class="fade-in">' +
       '<div class="relative mb-6">' +
         '<i class="fa fa-search absolute top-1/2 -translate-y-1/2 right-4 text-gray-400 text-sm"></i>' +
-        '<input id="search-input" value="' + esc(searchQuery) + '" oninput="onSearchInput(this.value)" placeholder="🔍 ابحث عن مادة أو معرض في ' + esc(scopeLabel) + '..." class="w-full pr-11 pl-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm">' +
+        '<input id="search-input" value="' + esc(searchQuery) + '" oninput="onSearchInput(this.value)" placeholder="🔍 ابحث عن مادة أو معرض في ' + esc(scopeLabel) + '..." class="w-full pr-11 pl-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm bp-search">' +
       '</div>' +
       (term ?
         '<div class="flex items-center gap-2 mb-5 flex-wrap">' +
@@ -636,14 +790,18 @@ function courseCardHTML(deptId, year, term, c, index) {
   const isGallery = c.type === 'gallery';
   const links = (c.sections || []).reduce((a, s) => a + (s.links || []).length, 0);
   const color = c.color || COURSE_COLORS[index % COURSE_COLORS.length];
+  const st = linkStats(c);
+  const manual = links === 0; /* معرض أو مادة من غير روابط — إنجاز يدوي */
   return '' +
-  '<div class="card-hover cursor-pointer group relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl" onclick="openCourse(\'' + deptId + '\',\'' + year + '\',\'' + (term || courseSem(c, deptId)) + '\',\'' + c.id + '\')">' +
-    '<div class="h-2 bg-gradient-to-r ' + color + '"></div>' +
+  '<div class="card-hover bp-card cursor-pointer group relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl bp-reveal" style="--i:' + index + '" onclick="openCourse(\'' + deptId + '\',\'' + year + '\',\'' + (term || courseSem(c, deptId)) + '\',\'' + c.id + '\')">' +
+    '<span class="bp-crop tl"></span><span class="bp-crop br"></span>' +
+    '<div class="h-1.5 bg-gradient-to-r ' + color + '"></div>' +
     '<div class="p-5">' +
       '<div class="flex items-start justify-between mb-4">' +
-        '<div class="w-12 h-12 bg-gradient-to-br ' + color + ' rounded-2xl flex items-center justify-center text-white text-xl shadow-md overflow-hidden">' +
-          (c.image ? '<img src="' + esc(c.image) + '" alt="" class="w-full h-full object-cover">' : '<i class="fa ' + (c.icon || COURSE_ICONS[index % COURSE_ICONS.length]) + '"></i>') +
+        '<div class="w-12 h-12 bg-gradient-to-br ' + color + ' rounded-xl flex items-center justify-center text-white text-xl shadow-md overflow-hidden">' +
+          (c.image ? '<img src="' + esc(c.image) + '" alt="" class="w-full h-full object-cover">' : iconSVG(c.icon || COURSE_ICONS[index % COURSE_ICONS.length])) +
         '</div>' +
+        '<span class="bp-micro" dir="ltr">C/' + ('0' + (index + 1)).slice(-2) + '</span>' +
       '</div>' +
       '<div class="flex items-center gap-2 mb-1">' + (isGallery ? '<span class="text-xs bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 px-2 py-0.5 rounded-full font-medium">معرض صور</span>' : '') +
       '<h3 class="font-bold text-gray-800 dark:text-white text-base leading-tight">' + esc(c.title) + '</h3></div>' +
@@ -656,6 +814,10 @@ function courseCardHTML(deptId, year, term, c, index) {
           '<span class="flex items-center gap-1"><i class="fa fa-link text-cyan-400"></i><span>' + links + ' رابط</span></span>' +
           ((c.notes || []).length ? '<span class="flex items-center gap-1 mr-auto"><i class="fa fa-sticky-note text-amber-400"></i><span>' + c.notes.length + '</span></span>' : '')
         ) +
+      '</div>' +
+      '<div class="flex items-center justify-between mt-3 gap-2">' +
+        '<span data-pjc="' + esc(c.id) + '" class="' + (coursePct(c) >= 1 ? 'bp-full' : '') + '">' + ringHTML(coursePct(c), st.total ? (st.done + '/' + st.total) : 'يدوي') + '</span>' +
+        (manual ? '<button type="button" data-pjm="' + esc(c.id) + '" class="bp-donebtn' + (progress.courses[c.id] ? ' bp-on' : '') + '" onclick="event.stopPropagation();toggleCourseDone(\'' + c.id + '\')">' + (progress.courses[c.id] ? '<i class="fa fa-check"></i> مكتملة' : '<i class="fa fa-check"></i> علّمها كمكتملة') + '</button>' : '') +
       '</div>' +
     '</div>' +
   '</div>';
@@ -675,12 +837,13 @@ function renderCourse(deptId, year, courseId) {
   const totalLinks = (c.sections || []).reduce((a, s) => a + (s.links || []).length, 0);
   const color = c.color || COURSE_COLORS[0];
 
-  const sectionsHTML = (c.sections || []).map(s => {
+  const sectionsHTML = (c.sections || []).map((s, si) => {
     const collapsed = !!collapsedSections[s.id];
     return '' +
-    '<div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-4">' +
+    '<div class="bg-white dark:bg-gray-800 bp-card bp-reveal rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-4" style="--i:' + (si + 1) + '">' +
       '<div class="flex items-center gap-2 px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 select-none" onclick="toggleSectionCollapse(\'' + s.id + '\')">' +
         '<i class="fa fa-chevron-' + (collapsed ? 'down' : 'up') + ' text-gray-400 text-xs"></i>' +
+        '<span class="bp-micro" dir="ltr">S' + ('0' + (si + 1)).slice(-2) + '</span>' +
         '<span class="font-bold text-gray-800 dark:text-white text-sm flex-1 truncate">' + esc(s.name) + '</span>' +
         (s.badge ? '<span class="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full font-semibold">' + esc(s.badge) + '</span>' : '') +
         '<span class="text-xs text-gray-400">' + ((s.links || []).length) + ' رابط</span>' +
@@ -688,7 +851,8 @@ function renderCourse(deptId, year, courseId) {
       (collapsed ? '' :
         '<div class="px-3 pb-3">' +
           (s.links || []).map(l =>
-            '<div class="flex items-center gap-2 py-1.5 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50">' +
+            '<div data-pjl="' + esc(l.id) + '" class="' + (progress.links[l.id] ? 'bp-done ' : '') + 'flex items-center gap-2 py-1.5 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50">' +
+              '<button type="button" title="علّم إنك خلصته" class="bp-check' + (progress.links[l.id] ? ' bp-on' : '') + '" onclick="event.stopPropagation();toggleLink(\'' + l.id + '\')"></button>' +
               '<i class="' + getLinkIcon(l.url) + ' ' + getLinkColor(l.url) + ' text-sm w-4 flex-shrink-0"></i>' +
               '<a href="' + esc(l.url) + '" target="_blank" rel="noopener noreferrer" class="flex-1 text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 truncate">' + esc(l.name) + '</a>' +
             '</div>'
@@ -720,12 +884,18 @@ function renderCourse(deptId, year, courseId) {
       headerHTML({ dept: deptId, course: courseId }) +
       '<main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6">' +
         '<button onclick="closeCourseView(\'' + deptId + '\',\'' + year + '\',\'' + courseSem(c, deptId) + '\')" class="flex items-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-500 mb-4"><i class="fa fa-arrow-right"></i> رجوع لـ ' + esc((deptOf(deptId) || {}).name || '') + '</button>' +
-        '<div class="rounded-3xl p-6 mb-6 bg-gradient-to-r ' + color + ' text-white shadow-lg fade-in">' +
+        '<div class="rounded-3xl p-6 mb-6 bg-gradient-to-r ' + color + ' text-white shadow-lg fade-in bp-oncolor">' +
           '<div class="flex items-center gap-4 min-w-0">' +
-            '<div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-2xl overflow-hidden flex-shrink-0">' + (c.image ? '<img src="' + esc(c.image) + '" class="w-full h-full object-cover" alt="">' : '<i class="fa ' + (c.icon || 'fa-book') + '"></i>') + '</div>' +
+            '<div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-2xl overflow-hidden flex-shrink-0">' + (c.image ? '<img src="' + esc(c.image) + '" class="w-full h-full object-cover" alt="">' : iconSVG(c.icon || 'fa-book')) + '</div>' +
             '<div class="min-w-0"><h1 class="text-xl sm:text-2xl font-bold truncate">' + esc(c.title) + '</h1>' +
               '<p class="text-white/80 text-sm mt-1 truncate">' + esc(c.doc || '') + '</p>' +
               '<div class="flex gap-4 mt-2 text-sm text-white/70"><span><i class="fa fa-layer-group ml-1"></i>' + ((c.sections || []).length) + ' قسم</span><span><i class="fa fa-link ml-1"></i>' + totalLinks + ' رابط</span><span><i class="fa fa-sticky-note ml-1"></i>' + ((c.notes || []).length) + ' ملاحظة</span></div>' +
+              '<div class="flex items-center gap-3 mt-3 flex-wrap">' +
+                '<span data-pjc="' + esc(c.id) + '" class="' + (coursePct(c) >= 1 ? 'bp-full' : '') + '">' + ringHTML(coursePct(c), linkStats(c).total ? (linkStats(c).done + '/' + linkStats(c).total) : '') + '</span>' +
+                '<span class="bp-micro" style="color:rgba(255,255,255,.8)">PROGRESS · تقدمك</span>' +
+                '<button type="button" onclick="resetCourseProgress(\'' + c.id + '\')" class="text-xs font-bold px-3 py-1 rounded-lg" style="background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.25)">مسح التقدم</button>' +
+                (linkStats(c).total === 0 ? '<button type="button" data-pjm="' + esc(c.id) + '" class="text-xs font-bold px-3 py-1 rounded-lg" style="background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.25)" onclick="toggleCourseDone(\'' + c.id + '\')">' + (progress.courses[c.id] ? 'مكتملة ✓' : 'علّمها كمكتملة') + '</button>' : '') +
+              '</div>' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -754,10 +924,15 @@ function renderGallery(deptId, year, c) {
       headerHTML({ dept: deptId, course: c.id }) +
       '<main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6">' +
         '<button onclick="closeCourseView(\'' + deptId + '\',\'' + year + '\',\'' + courseSem(c, deptId) + '\')" class="flex items-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-500 mb-4"><i class="fa fa-arrow-right"></i> رجوع</button>' +
-        '<div class="rounded-3xl p-6 mb-6 bg-gradient-to-r ' + color + ' text-white shadow-lg fade-in">' +
+        '<div class="rounded-3xl p-6 mb-6 bg-gradient-to-r ' + color + ' text-white shadow-lg fade-in bp-oncolor">' +
           '<div class="flex items-center gap-4">' +
-            '<div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-2xl overflow-hidden flex-shrink-0">' + (c.image ? '<img src="' + esc(c.image) + '" class="w-full h-full object-cover" alt="">' : '<i class="fa fa-images"></i>') + '</div>' +
+            '<div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-2xl overflow-hidden flex-shrink-0">' + (c.image ? '<img src="' + esc(c.image) + '" class="w-full h-full object-cover" alt="">' : iconSVG('images')) + '</div>' +
             '<div><h1 class="text-xl sm:text-2xl font-bold">' + esc(c.title) + '</h1><p class="text-white/80 text-sm mt-1">' + esc(c.doc || '') + '</p>' +
+            '<div class="flex items-center gap-3 mt-3 flex-wrap">' +
+              '<span data-pjc="' + esc(c.id) + '" class="' + (coursePct(c) >= 1 ? 'bp-full' : '') + '">' + ringHTML(coursePct(c), '') + '</span>' +
+              '<button type="button" data-pjm="' + esc(c.id) + '" class="text-xs font-bold px-3 py-1 rounded-lg" style="background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.25)" onclick="toggleCourseDone(\'' + c.id + '\')">' + (progress.courses[c.id] ? 'مكتملة ✓' : 'علّمها كمكتملة') + '</button>' +
+              '<button type="button" onclick="resetCourseProgress(\'' + c.id + '\')" class="text-xs font-bold px-3 py-1 rounded-lg" style="background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.25)">مسح التقدم</button>' +
+            '</div>' +
             '<div class="flex gap-4 mt-2 text-sm text-white/70"><span><i class="fa fa-image ml-1"></i>' + imgs.length + ' صورة</span></div></div>' +
           '</div>' +
         '</div>' +
@@ -817,5 +992,6 @@ function render() {
 
 // ---------------- إقلاع ----------------
 applyDark();
+mountCircuitBg(); // خلفية الدائرة الإلكترونية الحيّة
 render(); // شاشة تحميل الأول
 loadState().then(() => { render(); });
