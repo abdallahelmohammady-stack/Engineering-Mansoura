@@ -1,7 +1,7 @@
 {
   "app": "eng-materials",
   "version": 1,
-  "exportedAt": 1785671202710,
+  "exportedAt": 1785671306630,
   "exportedBy": "abdallah",
   "departments": {
     "prep": {
@@ -1751,14 +1751,6 @@
         "4": []
       }
     },
-    "energy": {
-      "years": {
-        "1": [],
-        "2": [],
-        "3": [],
-        "4": []
-      }
-    },
     "biomedical": {
       "years": {
         "1": [],
@@ -1769,15 +1761,6 @@
     }
   },
   "customDepts": [
-    {
-      "id": "energy",
-      "name": "طاقه متجدده",
-      "group": "special",
-      "icon": "car",
-      "color": "from-orange-500 to-red-500",
-      "desc": "",
-      "welcome": ""
-    },
     {
       "id": "biomedical",
       "name": "هندسة طبية وحيوية",
@@ -1800,8 +1783,7 @@
     "commcomp",
     "mechat",
     "ai",
-    "biomedical",
-    "energy"
+    "biomedical"
   ],
   "hiddenDepts": []
 }
