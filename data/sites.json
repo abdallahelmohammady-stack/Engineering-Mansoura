@@ -1,7 +1,7 @@
 {
   "app": "eng-materials",
   "version": 1,
-  "exportedAt": 1785668778088,
+  "exportedAt": 1785671202710,
   "exportedBy": "abdallah",
   "departments": {
     "prep": {
@@ -1750,7 +1750,6 @@
         "3": [],
         "4": []
       }
-    
     },
     "energy": {
       "years": {
@@ -1758,7 +1757,6 @@
         "2": [],
         "3": [],
         "4": []
-    
       }
     },
     "biomedical": {
@@ -1805,8 +1803,5 @@
     "biomedical",
     "energy"
   ],
-  "deletedDepts": [
-    "bio",
-    "biomed"
-  ]
+  "hiddenDepts": []
 }
