@@ -1,7 +1,7 @@
 {
   "app": "eng-materials",
   "version": 1,
-  "exportedAt": 1785671306630,
+  "exportedAt": 1785720430610,
   "exportedBy": "abdallah",
   "departments": {
     "prep": {
@@ -1785,5 +1785,6 @@
     "ai",
     "biomedical"
   ],
-  "hiddenDepts": []
+  "hiddenDepts": [],
+  "adminAccounts": []
 }
