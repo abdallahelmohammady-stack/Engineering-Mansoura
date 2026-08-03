@@ -419,10 +419,8 @@ button:active{transform:scale(.97)}
 .dark .bp-cir-main circle{fill:#3f70d8}
 .bp-cir-main rect{fill:none;stroke:#86a8f0;stroke-width:2;opacity:.85}
 .dark .bp-cir-main rect{stroke:#3f70d8}
-.bp-chip-art path,.bp-chip-art rect{fill:none;stroke:#9db9ff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.dark .bp-chip-art path,.dark .bp-chip-art rect{stroke:#a8c6ff}
-.bp-chip-art circle{fill:#9db9ff}
-.dark .bp-chip-art circle{fill:#a8c6ff}
+.bp-cir-dim .viadot{fill:#a9bff3;stroke:none;opacity:.7}
+.dark .bp-cir-dim .viadot{fill:#22479c}
 .bp-comets{opacity:.85}
 .dark .bp-comets{opacity:1}
 #root{position:relative;z-index:1}
