@@ -407,11 +407,24 @@ button:active{transform:scale(.97)}
    --------------------------------------------------------------- */
 .bp-circuit{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .bp-cirsvg{width:100%;height:100%;display:block}
-.bp-cir-lines{color:rgba(37,99,235,.22)}
-.dark .bp-cir-lines{color:rgba(126,173,255,.28)}
-.bp-cir-lines path,.bp-cir-lines rect{fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
-.bp-cir-lines circle{fill:currentColor;stroke:none}
-.bp-cur .halo{opacity:.16}
+.bp-cirbg{fill:url(#cirBgLt)}
+.dark .bp-cirbg{fill:url(#cirBg)}
+.bp-cir-dim path{fill:none;stroke:#a9bff3;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.6}
+.dark .bp-cir-dim path{stroke:#22479c}
+.bp-cir-dim circle,.bp-cir-dim rect{fill:none;stroke:#a9bff3;stroke-width:1.5;opacity:.6}
+.dark .bp-cir-dim circle,.dark .bp-cir-dim rect{stroke:#22479c}
+.bp-cir-main path{fill:none;stroke:#86a8f0;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
+.dark .bp-cir-main path{stroke:#3f70d8;opacity:.85}
+.bp-cir-main circle{fill:#86a8f0;opacity:.85}
+.dark .bp-cir-main circle{fill:#3f70d8}
+.bp-cir-main rect{fill:none;stroke:#86a8f0;stroke-width:2;opacity:.85}
+.dark .bp-cir-main rect{stroke:#3f70d8}
+.bp-chip-art path,.bp-chip-art rect{fill:none;stroke:#9db9ff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.dark .bp-chip-art path,.dark .bp-chip-art rect{stroke:#a8c6ff}
+.bp-chip-art circle{fill:#9db9ff}
+.dark .bp-chip-art circle{fill:#a8c6ff}
+.bp-comets{opacity:.85}
+.dark .bp-comets{opacity:1}
 #root{position:relative;z-index:1}
 
 /* ---------------------------------------------------------------
@@ -420,7 +433,7 @@ button:active{transform:scale(.97)}
    طبقة معتمة + طبقة تيارات باهتة = مفيش حاجة ظاهرة خالص)
    --------------------------------------------------------------- */
 .dot-pattern.bg-gray-50{background-color:rgba(237,241,249,.45) !important}
-.dark .dot-pattern.bg-gray-950{background-color:rgba(6,11,27,.52) !important}
+.dark .dot-pattern.bg-gray-950{background-color:rgba(6,11,27,.30) !important}
 
 /* ---------- من غير حركة للي بيفضّلوا تقليلها (إتاحة) ---------- */
 @media (prefers-reduced-motion:reduce){
@@ -429,7 +442,7 @@ button:active{transform:scale(.97)}
   .bp-title-mark{animation:none}
   .card-hover,.card-hover::after,button,.year-tab,.bp-chip,.bp-check,.icon-pick,.dm-icpick{transition-duration:.01ms !important}
   .bp-ring .bp-rfg{transition:none}
-  .bp-cur{display:none}
+  .bp-comets{display:none}
 }
 
 /* -----------------------------------------------------------
