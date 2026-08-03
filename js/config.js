@@ -116,20 +116,17 @@ const COURSE_GLYPHS = COURSE_ICON_KEYS;
 
 /* ------------------------------------------------------------
    ⚡ خلفية الدائرة الإلكترونية الحيّة (لايت + دارك)
-   لوحة دارة كحلية غنية بالفيا والبادات + شيب مركزي متوهّج + نبضات ضوء أحادية اللون بتجري في المسارات (SMIL على الجراديانت)
+   لوحة PCB مكثّفة من غير شيب مركزي: زوايا 45° + فيا مزدوجة + سفوف SMD + السر محيطي + 14 نبضة أحادية اللون (SMIL على الجراديانت)
    خفيفة: عناصر قليلة ثابتة العدد، والحركة كلها على نفس نظام الإحداثيات
    ------------------------------------------------------------ */
 function mountCircuitBg() {
   try {
     if (document.getElementById('bp-circuit-bg')) return;
-    /* 🖼️ لوحة الدائرة على شكل الصورة المرجعية:
-       خلفية كحلية غامقة بفينييت + مسارات كتير غنية (فيا/بادات) +
-       شيب مركزي متوهّج + نبضة ضوء بتجري في كل مسار أساسي —
-       كل نبضة لون واحد ثابت (مختلف عن جارتها، ومفيش تداخل ألوان). */
+    /* 🖼️ لوحة PCB مكثّفة (من غير شيب مركزي):
+       مسارات أساسية + ثانوية كتير، زوايا 45°، فيا مزدوجة (حلقة + نقطة)،
+       سفوف بادات SMD، السر المحيطي، مجمع فيا في النص —
+       ونبضة واحدة أحادية اللون بتجري في 14 مسار (8 أساسية + 6 متساقطات). */
 
-    /* المسارات الأساسية الثمانية (هندستها زي ما هي عشان بيانات الفيا تفضل صح) —
-       بس كل واحد بقى ليه نبضة بلون مختلف: سماوي، أزرق، بنفسجي، ماجنتا،
-       عنبري، أخضر، وردي، فيروزي */
     const MAIN = [
       ['cir-1', 'M-30,150 H240 V360 H540 V280 H900 V360 H1120', 10, '#00e5ff'],
       ['cir-2', 'M-30,780 H200 V580 H480 V700 H820 V620 H1060', 13, '#4d8dff'],
@@ -155,8 +152,45 @@ function mountCircuitBg() {
     const mainPads = elbows.map(p => '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="4"/>').join('') +
       ends.map(p => '<rect x="' + (p[0]-5) + '" y="' + (p[1]-5) + '" width="10" height="10" rx="2"/>').join('');
 
-    /* المسارات الثانوية (خلفية غنية زي الصورة) — بنكتب نقاط المنعطفات بس،
-       والكود بيبني أمر الرسم والزوايا الدائرية والبادات أوتوماتيك */
+    function dFromPts(pts) {
+      let d = 'M' + pts[0][0] + ',' + pts[0][1];
+      for (let i = 1; i < pts.length; i++) {
+        const px = pts[i][0] - pts[i-1][0], py = pts[i][1] - pts[i-1][1];
+        if (px === 0) d += ' V' + pts[i][1];
+        else if (py === 0) d += ' H' + pts[i][0];
+        else d += ' L' + pts[i][0] + ',' + pts[i][1]; // زاوية 45° — توقيع الـ PCB
+      }
+      return d;
+    }
+    function secMarkup(ptsList) {
+      return ptsList.map(function(pts, ix) {
+        let m = '<path d="' + dFromPts(pts) + '"/>';
+        for (let i = 1; i < pts.length - 1; i++) { // فيا مزدوجة: حلقة + نقطة
+          m += '<circle cx="' + pts[i][0] + '" cy="' + pts[i][1] + '" r="5"/>' +
+               '<circle class="viadot" cx="' + pts[i][0] + '" cy="' + pts[i][1] + '" r="2"/>';
+        }
+        const lp = pts[pts.length - 1];
+        m += (ix % 3 === 0)
+          ? '<rect x="' + (lp[0]-5) + '" y="' + (lp[1]-5) + '" width="10" height="10" rx="2"/>'
+          : '<circle cx="' + lp[0] + '" cy="' + lp[1] + '" r="5.5"/>';
+        return m;
+      }).join('');
+    }
+    function busMarkup(pts, n, gap, dx, dy) { // باص متوازي: نسخ مزاحة خطوة خطوة
+      let m = '';
+      for (let k = 1; k < n; k++) {
+        m += secMarkup([pts.map(function(p){ return [p[0] + dx * k * gap, p[1] + dy * k * gap]; })]);
+      }
+      return m;
+    }
+    function smdRow(x, y, n, dx, dy) { // سف بادات SMD صغيرة
+      let m = '';
+      for (let i = 0; i < n; i++) {
+        m += '<rect x="' + (x + dx * i) + '" y="' + (y + dy * i) + '" width="9" height="9" rx="1.5"/>';
+      }
+      return m;
+    }
+
     const SEC = [
       [[-30,60],[200,60],[200,110],[360,110]],
       [[400,50],[620,50],[620,110],[760,110],[760,50]],
@@ -173,48 +207,48 @@ function mountCircuitBg() {
       [[70,840],[70,930]],
       [[1230,120],[1230,210],[1290,210],[1290,270],[1350,270],[1350,340],[1410,340]],
       [[180,430],[260,430],[260,510],[340,510]],
-      [[1010,300],[1080,300],[1080,360],[1160,360],[1160,300]]
+      [[1010,300],[1080,300],[1080,360],[1160,360],[1160,300]],
+      [[250,-30],[250,90],[310,150]],
+      [[560,640],[640,720],[760,720],[840,800],[840,860]],
+      [[-30,430],[60,430],[140,510],[140,610]],
+      [[1470,300],[1400,300],[1400,240],[1330,240],[1260,170]],
+      [[1470,476],[1408,476],[1352,420],[1352,340]],
+      [[955,206],[1015,206],[1060,161],[1060,116],[1120,60]],
+      [[620,900],[740,900],[800,840],[920,840],[980,780]],
+      [[344,530],[404,530],[450,484],[534,484]],
+      [[-30,700],[60,700],[120,760],[120,830]],
+      [[290,300],[290,240],[370,240],[440,170],[440,110]],
+      [[1300,690],[1240,690],[1180,750],[1180,810]],
+      [[60,360],[120,360],[160,400],[160,440]],
+      [[1450,700],[1390,700],[1330,760],[1330,830]],
+      [[840,30],[840,90],[900,150]],
+      [[160,170],[220,170],[270,120]]
     ];
-    function dFromPts(pts) {
-      let d = 'M' + pts[0][0] + ',' + pts[0][1];
-      for (let i = 1; i < pts.length; i++) {
-        d += (pts[i][0] === pts[i-1][0]) ? ' V' + pts[i][1] : ' H' + pts[i][0];
-      }
-      return d;
-    }
-    function secMarkup(ptsList, extraDy) {
-      return ptsList.map(function(pts, ix) {
-        const shifted = extraDy ? pts.map(function(p){ return [p[0], p[1] + extraDy]; }) : pts;
-        let m = '<path d="' + dFromPts(shifted) + '"/>';
-        for (let i = 1; i < shifted.length - 1; i++) {
-          m += '<circle cx="' + shifted[i][0] + '" cy="' + shifted[i][1] + '" r="3.4"/>';
-        }
-        const lp = shifted[shifted.length - 1];
-        m += (ix % 3 === 0)
-          ? '<rect x="' + (lp[0]-5) + '" y="' + (lp[1]-5) + '" width="10" height="10" rx="2"/>'
-          : '<circle cx="' + lp[0] + '" cy="' + lp[1] + '" r="5.5"/>';
-        return m;
-      }).join('');
-    }
-    const secTraces = secMarkup(SEC, 0) +
-      secMarkup([[[-30,330],[140,330],[140,250],[250,250]]], 0) +
-      secMarkup([[[-30,354],[140,354],[140,274],[250,274]]], 0) +
-      secMarkup([[[-30,378],[140,378],[140,298],[250,298]]], 0) +
-      secMarkup([[[330,930],[330,760],[540,760]]], 0) +
-      secMarkup([[[354,930],[354,784],[540,784]]], 0) +
-      secMarkup([[[378,930],[378,808],[540,808]]], 0);
+    const SEC_COMETS = [
+      ['sec-1', [[320,-30],[320,72],[1140,72],[1140,-30]], 17, '#2ee6c8'],
+      ['sec-2', [[494,-30],[494,14],[666,186],[666,286]], 21, '#ff6b81'],
+      ['sec-3', [[1140,930],[1140,740]], 20, '#ffb224'],
+      ['sec-4', [[1428,-30],[1428,108],[1332,204],[1332,252]], 19, '#4d8dff'],
+      ['sec-5', [[-30,706],[54,706],[134,786],[134,900]], 22, '#00e5ff'],
+      ['sec-6', [[392,930],[392,722],[492,622],[552,622]], 23, '#a855f7']
+    ];
+    const smd =
+      smdRow(30, 316, 9, 0, 21) +
+      smdRow(1260, 28, 10, 21, 0) +
+      smdRow(1396, 420, 7, 0, 21) +
+      smdRow(770, 852, 8, 21, 0);
+    const centerVia =
+      '<circle cx="720" cy="428" r="12"/>' +
+      '<circle cx="720" cy="428" r="20"/>' +
+      '<circle cx="720" cy="428" r="28"/>' +
+      '<circle class="viadot" cx="720" cy="428" r="5"/>' +
+      dFromPts([[720,428],[790,360],[832,360]]) +
+      dFromPts([[720,428],[650,360],[608,360]]) +
+      dFromPts([[720,428],[790,496],[832,496]]) +
+      dFromPts([[720,428],[650,496],[608,496]]);
+    const frame = dFromPts([[20,20],[1420,20],[1420,880],[20,880],[20,20]]);
 
-    /* الشيب المركزي + هالة نور (زي قلب الصورة) */
-    const chipArt =
-      '<ellipse cx="720" cy="428" rx="215" ry="165" fill="url(#chipGlow)"/>' +
-      '<g class="bp-chip-art">' +
-        '<path d="M690 382v-24M720 382v-24M750 382v-24M690 474v24M720 474v24M750 474v24M666 404h-24M666 428h-24M666 452h-24M774 404h24M774 428h24M774 452h24"/>' +
-        '<rect x="666" y="382" width="108" height="92" rx="12"/>' +
-        '<rect x="700" y="412" width="40" height="32" rx="6"/>' +
-        '<circle cx="681" cy="397" r="3.4"/>' +
-      '</g>';
-
-    /* تحديد محور النبضة واتجاهها من شكل المسار (أوامر M/H/V) */
+    /* محور النبضة واتجاهها من شكل المسار (أوامر M/H/V) */
     function axisOf(dStr) {
       let x = 0, y = 0, x0 = null, y0 = null, hLen = 0, vLen = 0;
       (dStr.match(/[A-Za-z][-\d.,]*/g) || []).forEach(function(seg) {
@@ -227,34 +261,32 @@ function mountCircuitBg() {
       return { ax: 'y', sgn: (y - (y0 === null ? 0 : y0)) < 0 ? -1 : 1 };
     }
 
-    /* ⚡ نبضة واحدة لكل مسار — لون واحد ثابت من أولها لآخرها:
-       جراديانت نافذته اللامعة جزء صغير من دورة طويلة جداً (2400 وحدة) —
-       فالسلك طوله أقل من الدورة ⬅️ نبضة واحدة بس ظاهرة: ذيل داكن ⬅️ جسم لامع
-       ⬅️ راس أبيض متوهّج ⬅️ انقطاع، وبيتزحزح بـ SMIL على طول المسار.
-       ⚠️ ممنوع drop-shadow/blur: اللمعان كله داخل الستوبس (سعره صفر). */
+    /* ⚡ نبضة واحدة لكل مسار — لون واحد ثابت (نافذة لامعة في دورة 2400 وحدة) */
     const PERIOD = 2400;
-    function cometGrad(t, ix) {
-      const a = axisOf(t[1]);
+    function cometGrad(id, dStr, C, dur, ix) {
+      const a = axisOf(dStr);
       const dx = a.ax === 'x' ? PERIOD * a.sgn : 0;
       const dy = a.ax === 'y' ? PERIOD * a.sgn : 0;
-      const C = t[3];
-      const begin = '-' + (ix * 2.3).toFixed(1) + 's';
-      return '<linearGradient id="comet-' + t[0] + '" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="' + dx + '" y2="' + dy + '" spreadMethod="repeat">' +
+      const begin = '-' + (ix * 1.7).toFixed(1) + 's';
+      return '<linearGradient id="comet-' + id + '" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="' + dx + '" y2="' + dy + '" spreadMethod="repeat">' +
         '<stop offset="0" stop-color="' + C + '" stop-opacity="0"/>' +
         '<stop offset="0.78" stop-color="' + C + '" stop-opacity="0"/>' +
         '<stop offset="0.865" stop-color="' + C + '" stop-opacity="0.5"/>' +
         '<stop offset="0.935" stop-color="' + C + '"/>' +
         '<stop offset="0.96" stop-color="#ffffff"/>' +
         '<stop offset="1" stop-color="' + C + '" stop-opacity="0"/>' +
-        '<animate attributeName="x1" from="0" to="' + dx + '" dur="' + t[2] + 's" begin="' + begin + '" repeatCount="indefinite"/>' +
-        '<animate attributeName="y1" from="0" to="' + dy + '" dur="' + t[2] + 's" begin="' + begin + '" repeatCount="indefinite"/>' +
-        '<animate attributeName="x2" from="' + dx + '" to="' + (dx * 2) + '" dur="' + t[2] + 's" begin="' + begin + '" repeatCount="indefinite"/>' +
-        '<animate attributeName="y2" from="' + dy + '" to="' + (dy * 2) + '" dur="' + t[2] + 's" begin="' + begin + '" repeatCount="indefinite"/>' +
+        '<animate attributeName="x1" from="0" to="' + dx + '" dur="' + dur + 's" begin="' + begin + '" repeatCount="indefinite"/>' +
+        '<animate attributeName="y1" from="0" to="' + dy + '" dur="' + dur + 's" begin="' + begin + '" repeatCount="indefinite"/>' +
+        '<animate attributeName="x2" from="' + dx + '" to="' + (dx * 2) + '" dur="' + dur + 's" begin="' + begin + '" repeatCount="indefinite"/>' +
+        '<animate attributeName="y2" from="' + dy + '" to="' + (dy * 2) + '" dur="' + dur + 's" begin="' + begin + '" repeatCount="indefinite"/>' +
       '</linearGradient>';
     }
-    const comets = MAIN.map(function(t) {
-      return '<path class="bp-cometsoft" d="' + t[1] + '" fill="none" stroke="url(#comet-' + t[0] + ')" stroke-width="8" stroke-opacity="0.55" stroke-linecap="round" stroke-linejoin="round"/>' +
-        '<path class="bp-comet" d="' + t[1] + '" fill="none" stroke="url(#comet-' + t[0] + ')" stroke-width="2.6" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>';
+    const ALL_COMETS = MAIN.map(t => [t[0], t[1], t[2], t[3], 8, 2.6, 0.55, 1])
+      .concat(SEC_COMETS.map(t => [t[0], dFromPts(t[1]), t[2], t[3], 5.5, 1.7, 0.4, 0.7]));
+    const gradsHtml = ALL_COMETS.map(function(t, ix) { return cometGrad(t[0], t[1], t[3], t[2], ix); }).join('');
+    const comets = ALL_COMETS.map(function(t) {
+      return '<path class="bp-cometsoft" d="' + t[1] + '" fill="none" stroke="url(#comet-' + t[0] + ')" stroke-width="' + t[4] + '" stroke-opacity="' + t[6] + '" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '<path class="bp-comet" d="' + t[1] + '" fill="none" stroke="url(#comet-' + t[0] + ')" stroke-width="' + t[5] + '" stroke-opacity="' + t[7] + '" stroke-linecap="round" stroke-linejoin="round"/>';
     }).join('');
 
     const defs = '<defs>' +
@@ -264,14 +296,8 @@ function mountCircuitBg() {
       '<radialGradient id="cirBgLt" cx="50%" cy="42%" r="78%">' +
         '<stop offset="0" stop-color="#ffffff"/><stop offset="0.6" stop-color="#eef3fe"/><stop offset="1" stop-color="#dce6fa"/>' +
       '</radialGradient>' +
-      '<radialGradient id="chipGlow" cx="50%" cy="50%" r="50%">' +
-        '<stop offset="0" stop-color="#3fb9ff" stop-opacity="0.5"/>' +
-        '<stop offset="0.6" stop-color="#3fb9ff" stop-opacity="0.16"/>' +
-        '<stop offset="1" stop-color="#3fb9ff" stop-opacity="0"/>' +
-      '</radialGradient>' +
-      MAIN.map(cometGradWithIx).join('') +
+      gradsHtml +
     '</defs>';
-    function cometGradWithIx(t, ix) { return cometGrad(t, ix); }
 
     const d = document.createElement('div');
     d.className = 'bp-circuit';
@@ -281,9 +307,8 @@ function mountCircuitBg() {
       '<svg class="bp-cirsvg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">' +
         defs +
         '<rect class="bp-cirbg" x="0" y="0" width="1440" height="900"/>' +
-        '<g class="bp-cir-dim">' + secTraces + '</g>' +
+        '<g class="bp-cir-dim">' + frame + secMarkup(SEC) + busMarkup(SEC[6], 3, 24, 0, 1) + busMarkup(SEC[7], 3, 24, 0, 1) + smd + centerVia + '</g>' +
         '<g class="bp-cir-main">' + mainTraces + mainPads + '</g>' +
-        chipArt +
         '<g class="bp-comets">' + comets + '</g>' +
       '</svg>';
     document.body.insertBefore(d, document.body.firstChild);
