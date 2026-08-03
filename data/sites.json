@@ -1,7 +1,7 @@
 {
   "app": "eng-materials",
   "version": 1,
-  "exportedAt": 1785723307814,
+  "exportedAt": 1785726190496,
   "exportedBy": "abdallah",
   "departments": {
     "prep": {
@@ -1751,6 +1751,14 @@
         "4": []
       }
     },
+    "energy": {
+      "years": {
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": []
+      }
+    },
     "biomedical": {
       "years": {
         "1": [],
@@ -1762,6 +1770,15 @@
   },
   "customDepts": [
     {
+      "id": "energy",
+      "name": "طاقه متجدده",
+      "group": "special",
+      "icon": "car",
+      "color": "from-amber-500 to-orange-600",
+      "desc": "",
+      "welcome": ""
+    },
+    {
       "id": "biomedical",
       "name": "هندسة طبية وحيوية",
       "group": "special",
@@ -1771,7 +1788,14 @@
       "welcome": ""
     }
   ],
-  "deptOverrides": {},
+  "deptOverrides": {
+    "commcomp": {
+      "name": "اتصالات وحاسبات",
+      "desc": "Communications & Computers Program",
+      "icon": "cpu",
+      "color": "from-violet-500 to-purple-700"
+    }
+  },
   "deptOrder": [
     "prep",
     "comm",
@@ -1783,8 +1807,22 @@
     "commcomp",
     "mechat",
     "ai",
-    "biomedical"
+    "biomedical",
+    "energy"
   ],
   "hiddenDepts": [],
-  "adminAccounts": []
+  "adminAccounts": [
+    {
+      "user": "eng",
+      "pass": "55c6718f27f4c8077c7de17ab83bd2566f0cd0cc1b045bd15539767f5b2d2cb2",
+      "dept": "energy",
+      "label": "أدمن طاقه متجدده"
+    },
+    {
+      "user": "biomed",
+      "pass": "46a83f2abe6e70b07b94c4375b56e5bd6bedd858fd59691336866661159f74f3",
+      "dept": "biomedical",
+      "label": "أدمن هندسة طبية وحيوية"
+    }
+  ]
 }
