@@ -116,25 +116,31 @@ const COURSE_GLYPHS = COURSE_ICON_KEYS;
 
 /* ------------------------------------------------------------
    ⚡ خلفية الدائرة الإلكترونية الحيّة (لايت + دارك)
-   مسارات مرسومة SVG + تيارات ملونة بتجري عليها (SMIL animateMotion)
+   لوحة دارة كحلية غنية بالفيا والبادات + شيب مركزي متوهّج + نبضات ضوء أحادية اللون بتجري في المسارات (SMIL على الجراديانت)
    خفيفة: عناصر قليلة ثابتة العدد، والحركة كلها على نفس نظام الإحداثيات
    ------------------------------------------------------------ */
 function mountCircuitBg() {
   try {
     if (document.getElementById('bp-circuit-bg')) return;
-    /* 8 مسارات إلكترونية (بتتمدد أوتوماتيك مع الشاشة عشان viewBox + slice) */
-    const traces =
-      '<path id="cir-1" d="M-30,150 H240 V360 H540 V280 H900 V360 H1120"/>' +
-      '<path id="cir-2" d="M-30,780 H200 V580 H480 V700 H820 V620 H1060"/>' +
-      '<path id="cir-3" d="M720,930 V720 H1000 V540 H1280 V640 H1480"/>' +
-      '<path id="cir-4" d="M1470,190 H1200 V400 H940 V320 H660 V420 H480"/>' +
-      '<path id="cir-5" d="M320,-30 V200 H580 V440 H860"/>' +
-      '<path id="cir-6" d="M1140,-30 V240 H960 V460 H1240 V600 H1390"/>' +
-      '<path id="cir-7" d="M-30,470 H150 V320 H390 V470 H620"/>' +
-      '<path id="cir-8" d="M1470,840 H1300 V710 H1110 V820 H950"/>';
-    const chip =
-      '<rect x="880" y="560" width="120" height="80" rx="12"/>' +
-      '<path d="M900 560v-22M930 560v-22M960 560v-22M900 640v22M930 640v22M960 640v22M880 585h-22M880 615h-22M1000 585h22M1000 615h22"/>';
+    /* 🖼️ لوحة الدائرة على شكل الصورة المرجعية:
+       خلفية كحلية غامقة بفينييت + مسارات كتير غنية (فيا/بادات) +
+       شيب مركزي متوهّج + نبضة ضوء بتجري في كل مسار أساسي —
+       كل نبضة لون واحد ثابت (مختلف عن جارتها، ومفيش تداخل ألوان). */
+
+    /* المسارات الأساسية الثمانية (هندستها زي ما هي عشان بيانات الفيا تفضل صح) —
+       بس كل واحد بقى ليه نبضة بلون مختلف: سماوي، أزرق، بنفسجي، ماجنتا،
+       عنبري، أخضر، وردي، فيروزي */
+    const MAIN = [
+      ['cir-1', 'M-30,150 H240 V360 H540 V280 H900 V360 H1120', 10, '#00e5ff'],
+      ['cir-2', 'M-30,780 H200 V580 H480 V700 H820 V620 H1060', 13, '#4d8dff'],
+      ['cir-3', 'M720,930 V720 H1000 V540 H1280 V640 H1480', 15, '#a855f7'],
+      ['cir-4', 'M1470,190 H1200 V400 H940 V320 H660 V420 H480', 11, '#ff4dd8'],
+      ['cir-5', 'M320,-30 V200 H580 V440 H860', 9,  '#ffb224'],
+      ['cir-6', 'M1140,-30 V240 H960 V460 H1240 V600 H1390', 14, '#34e07a'],
+      ['cir-7', 'M-30,470 H150 V320 H390 V470 H620', 12, '#ff6b81'],
+      ['cir-8', 'M1470,840 H1300 V710 H1110 V820 H950', 16, '#2ee6c8']
+    ];
+    const mainTraces = MAIN.map(t => '<path id="' + t[0] + '" d="' + t[1] + '"/>').join('');
     const elbows = [
       [240,150],[240,360],[540,360],[540,280],[900,280],[900,360],
       [200,780],[200,580],[480,580],[480,700],[820,700],[820,620],
@@ -146,40 +152,139 @@ function mountCircuitBg() {
       [1300,840],[1300,710],[1110,710],[1110,820]
     ];
     const ends = [[1120,360],[1060,620],[480,420],[860,440],[1390,600],[620,470],[950,820]];
-    const pads = elbows.map(p => '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="4"/>').join('') +
+    const mainPads = elbows.map(p => '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="4"/>').join('') +
       ends.map(p => '<rect x="' + (p[0]-5) + '" y="' + (p[1]-5) + '" width="10" height="10" rx="2"/>').join('');
-    /* لكل مسار: تيار ملوّن (قلب + هالة توهّج) + نبضة تانية معاكسة.
-       ⚠️ مفيش drop-shadow ولا blur — التوهج = دائرة هالة شفافة بس.
-       فلاتر الظل على عناصر بتتحرك 24/7 كانت بتخلي المتصفح يعيد
-       رسم الظل كل فريم = تهنيج مع الوقت. الهالة سعرها صفر تقريباً. */
-    const flows = [
-      ['cir-1', '#22d3ee', 10],
-      ['cir-2', '#fbbf24', 13],
-      ['cir-3', '#f472b6', 15],
-      ['cir-4', '#60a5fa', 11],
-      ['cir-5', '#34d399', 9],
-      ['cir-6', '#a78bfa', 14],
-      ['cir-7', '#fb7185', 12],
-      ['cir-8', '#a3e635', 16]
+
+    /* المسارات الثانوية (خلفية غنية زي الصورة) — بنكتب نقاط المنعطفات بس،
+       والكود بيبني أمر الرسم والزوايا الدائرية والبادات أوتوماتيك */
+    const SEC = [
+      [[-30,60],[200,60],[200,110],[360,110]],
+      [[400,50],[620,50],[620,110],[760,110],[760,50]],
+      [[820,70],[980,70],[980,150],[1090,150]],
+      [[1170,60],[1380,60],[1380,120],[1470,120]],
+      [[60,-30],[60,220],[120,220],[120,300]],
+      [[1360,200],[1360,330],[1310,330]],
+      [[90,620],[90,760],[170,760]],
+      [[-30,240],[110,240],[110,330],[230,330]],
+      [[1330,560],[1410,560],[1410,640],[1470,640]],
+      [[1040,760],[1040,840],[1160,840]],
+      [[420,620],[560,620],[560,700],[680,700]],
+      [[760,700],[880,700],[880,790],[990,790]],
+      [[70,840],[70,930]],
+      [[1230,120],[1230,210],[1290,210],[1290,270],[1350,270],[1350,340],[1410,340]],
+      [[180,430],[260,430],[260,510],[340,510]],
+      [[1010,300],[1080,300],[1080,360],[1160,360],[1160,300]]
     ];
-    const am = (id, dur, begin) =>
-      '<animateMotion dur="' + dur + 's" begin="' + begin + 's" repeatCount="indefinite">' +
-        '<mpath href="#' + id + '"/>' +
-      '</animateMotion>';
-    const cur = flows.map(f =>
-      '<g class="cur" style="color:' + f[1] + '">' +
-        '<circle class="halo" r="9.5" fill="currentColor">' + am(f[0], f[2], 0) + '</circle>' +
-        '<circle class="core" r="4.6" fill="currentColor">' + am(f[0], f[2], 0) + '</circle>' +
-        '<circle class="core" r="3.2" fill="currentColor" opacity=".85">' + am(f[0], f[2], -f[2] / 2) + '</circle>' +
-      '</g>').join('');
+    function dFromPts(pts) {
+      let d = 'M' + pts[0][0] + ',' + pts[0][1];
+      for (let i = 1; i < pts.length; i++) {
+        d += (pts[i][0] === pts[i-1][0]) ? ' V' + pts[i][1] : ' H' + pts[i][0];
+      }
+      return d;
+    }
+    function secMarkup(ptsList, extraDy) {
+      return ptsList.map(function(pts, ix) {
+        const shifted = extraDy ? pts.map(function(p){ return [p[0], p[1] + extraDy]; }) : pts;
+        let m = '<path d="' + dFromPts(shifted) + '"/>';
+        for (let i = 1; i < shifted.length - 1; i++) {
+          m += '<circle cx="' + shifted[i][0] + '" cy="' + shifted[i][1] + '" r="3.4"/>';
+        }
+        const lp = shifted[shifted.length - 1];
+        m += (ix % 3 === 0)
+          ? '<rect x="' + (lp[0]-5) + '" y="' + (lp[1]-5) + '" width="10" height="10" rx="2"/>'
+          : '<circle cx="' + lp[0] + '" cy="' + lp[1] + '" r="5.5"/>';
+        return m;
+      }).join('');
+    }
+    const secTraces = secMarkup(SEC, 0) +
+      secMarkup([[[-30,330],[140,330],[140,250],[250,250]]], 0) +
+      secMarkup([[[-30,354],[140,354],[140,274],[250,274]]], 0) +
+      secMarkup([[[-30,378],[140,378],[140,298],[250,298]]], 0) +
+      secMarkup([[[330,930],[330,760],[540,760]]], 0) +
+      secMarkup([[[354,930],[354,784],[540,784]]], 0) +
+      secMarkup([[[378,930],[378,808],[540,808]]], 0);
+
+    /* الشيب المركزي + هالة نور (زي قلب الصورة) */
+    const chipArt =
+      '<ellipse cx="720" cy="428" rx="215" ry="165" fill="url(#chipGlow)"/>' +
+      '<g class="bp-chip-art">' +
+        '<path d="M690 382v-24M720 382v-24M750 382v-24M690 474v24M720 474v24M750 474v24M666 404h-24M666 428h-24M666 452h-24M774 404h24M774 428h24M774 452h24"/>' +
+        '<rect x="666" y="382" width="108" height="92" rx="12"/>' +
+        '<rect x="700" y="412" width="40" height="32" rx="6"/>' +
+        '<circle cx="681" cy="397" r="3.4"/>' +
+      '</g>';
+
+    /* تحديد محور النبضة واتجاهها من شكل المسار (أوامر M/H/V) */
+    function axisOf(dStr) {
+      let x = 0, y = 0, x0 = null, y0 = null, hLen = 0, vLen = 0;
+      (dStr.match(/[A-Za-z][-\d.,]*/g) || []).forEach(function(seg) {
+        const cmd = seg[0], nums = seg.slice(1).split(',');
+        if (cmd === 'M') { x = parseFloat(nums[0]); y = parseFloat(nums[1]); if (x0 === null) { x0 = x; y0 = y; } }
+        else if (cmd === 'H') { const nx = parseFloat(nums[0]); hLen += Math.abs(nx - x); x = nx; }
+        else if (cmd === 'V') { const ny = parseFloat(nums[0]); vLen += Math.abs(ny - y); y = ny; }
+      });
+      if (hLen >= vLen) return { ax: 'x', sgn: (x - (x0 === null ? 0 : x0)) < 0 ? -1 : 1 };
+      return { ax: 'y', sgn: (y - (y0 === null ? 0 : y0)) < 0 ? -1 : 1 };
+    }
+
+    /* ⚡ نبضة واحدة لكل مسار — لون واحد ثابت من أولها لآخرها:
+       جراديانت نافذته اللامعة جزء صغير من دورة طويلة جداً (2400 وحدة) —
+       فالسلك طوله أقل من الدورة ⬅️ نبضة واحدة بس ظاهرة: ذيل داكن ⬅️ جسم لامع
+       ⬅️ راس أبيض متوهّج ⬅️ انقطاع، وبيتزحزح بـ SMIL على طول المسار.
+       ⚠️ ممنوع drop-shadow/blur: اللمعان كله داخل الستوبس (سعره صفر). */
+    const PERIOD = 2400;
+    function cometGrad(t, ix) {
+      const a = axisOf(t[1]);
+      const dx = a.ax === 'x' ? PERIOD * a.sgn : 0;
+      const dy = a.ax === 'y' ? PERIOD * a.sgn : 0;
+      const C = t[3];
+      const begin = '-' + (ix * 2.3).toFixed(1) + 's';
+      return '<linearGradient id="comet-' + t[0] + '" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="' + dx + '" y2="' + dy + '" spreadMethod="repeat">' +
+        '<stop offset="0" stop-color="' + C + '" stop-opacity="0"/>' +
+        '<stop offset="0.78" stop-color="' + C + '" stop-opacity="0"/>' +
+        '<stop offset="0.865" stop-color="' + C + '" stop-opacity="0.5"/>' +
+        '<stop offset="0.935" stop-color="' + C + '"/>' +
+        '<stop offset="0.96" stop-color="#ffffff"/>' +
+        '<stop offset="1" stop-color="' + C + '" stop-opacity="0"/>' +
+        '<animate attributeName="x1" from="0" to="' + dx + '" dur="' + t[2] + 's" begin="' + begin + '" repeatCount="indefinite"/>' +
+        '<animate attributeName="y1" from="0" to="' + dy + '" dur="' + t[2] + 's" begin="' + begin + '" repeatCount="indefinite"/>' +
+        '<animate attributeName="x2" from="' + dx + '" to="' + (dx * 2) + '" dur="' + t[2] + 's" begin="' + begin + '" repeatCount="indefinite"/>' +
+        '<animate attributeName="y2" from="' + dy + '" to="' + (dy * 2) + '" dur="' + t[2] + 's" begin="' + begin + '" repeatCount="indefinite"/>' +
+      '</linearGradient>';
+    }
+    const comets = MAIN.map(function(t) {
+      return '<path class="bp-cometsoft" d="' + t[1] + '" fill="none" stroke="url(#comet-' + t[0] + ')" stroke-width="8" stroke-opacity="0.55" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '<path class="bp-comet" d="' + t[1] + '" fill="none" stroke="url(#comet-' + t[0] + ')" stroke-width="2.6" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>';
+    }).join('');
+
+    const defs = '<defs>' +
+      '<radialGradient id="cirBg" cx="50%" cy="42%" r="78%">' +
+        '<stop offset="0" stop-color="#102a63"/><stop offset="0.55" stop-color="#081536"/><stop offset="1" stop-color="#030818"/>' +
+      '</radialGradient>' +
+      '<radialGradient id="cirBgLt" cx="50%" cy="42%" r="78%">' +
+        '<stop offset="0" stop-color="#ffffff"/><stop offset="0.6" stop-color="#eef3fe"/><stop offset="1" stop-color="#dce6fa"/>' +
+      '</radialGradient>' +
+      '<radialGradient id="chipGlow" cx="50%" cy="50%" r="50%">' +
+        '<stop offset="0" stop-color="#3fb9ff" stop-opacity="0.5"/>' +
+        '<stop offset="0.6" stop-color="#3fb9ff" stop-opacity="0.16"/>' +
+        '<stop offset="1" stop-color="#3fb9ff" stop-opacity="0"/>' +
+      '</radialGradient>' +
+      MAIN.map(cometGradWithIx).join('') +
+    '</defs>';
+    function cometGradWithIx(t, ix) { return cometGrad(t, ix); }
+
     const d = document.createElement('div');
     d.className = 'bp-circuit';
     d.id = 'bp-circuit-bg';
     d.setAttribute('aria-hidden', 'true');
     d.innerHTML =
       '<svg class="bp-cirsvg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">' +
-        '<g class="bp-cir-lines">' + traces + chip + pads + '</g>' +
-        '<g class="bp-cur">' + cur + '</g>' +
+        defs +
+        '<rect class="bp-cirbg" x="0" y="0" width="1440" height="900"/>' +
+        '<g class="bp-cir-dim">' + secTraces + '</g>' +
+        '<g class="bp-cir-main">' + mainTraces + mainPads + '</g>' +
+        chipArt +
+        '<g class="bp-comets">' + comets + '</g>' +
       '</svg>';
     document.body.insertBefore(d, document.body.firstChild);
   } catch (e) {}
