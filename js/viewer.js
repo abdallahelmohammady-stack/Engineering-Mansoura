@@ -744,7 +744,7 @@ function renderHome() {
     : '<div class="text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-600">' +
         '<div class="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/25 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl text-indigo-300"><i class="fa fa-flag-checkered"></i></div>' +
         '<p class="text-gray-500 dark:text-gray-300 font-bold">لسه مبدأتش تقفل اللينكات</p>' +
-        '<p class="text-xs text-gray-400 mt-2 max-w-md mx-auto">علّم على أول لينك خلصته من صفحة أي مادة — واللوحة دي هتحسب تقدّمك على قسمك اللي بتشتغل فيه، مش على الموقع كله.</p></div>';
+        '<p class="text-xs text-gray-400 mt-2 max-w-md mx-auto">علّم على أول لينك خلصته من صفحة أي مادة — واللوحة دي هتحسب تقدّمك على القسم اللي بتشتغل فيه، مش على الموقع كله.</p></div>';
   $('root').innerHTML =
   '<div class="min-h-screen flex flex-col transition-colors duration-300 ' + (darkMode ? 'dark bg-gray-950' : 'bg-gray-50') + ' dot-pattern">' +
     headerHTML({ dept: null }) +
@@ -753,7 +753,7 @@ function renderHome() {
         '<span class="bp-crop tl"></span><span class="bp-crop tr"></span><span class="bp-crop bl"></span><span class="bp-crop br"></span>' +
         '<p class="bp-micro">WELCOME · MANSOURA ENGINEERING · MATERIALS BLUEPRINT</p>' +
         '<h1 class="site-title text-3xl md:text-5xl font-black text-gray-800 dark:text-white mt-2 mb-4">أهلاً بيك <span class="inline-block">في <span class="bp-title-mark">مكتبة مواد كلية الهندسة</span></span></h1>' +
-        '<p class="text-gray-500 dark:text-gray-400 max-w-xl">كل الملخصات واللينكات والمذكرات اللي الأدمنز رافعينها في مكان واحد — اختار قسمك من الشريط اللي على يمينك، علّم على اللي خلصته، واحفظ أهم اللينكات في المفضلة.</p>' +
+        '<p class="text-gray-500 dark:text-gray-400 max-w-xl">كل الملخصات واللينكات والمذكرات اللي الأدمنز رافعينها في مكان واحد — اختار القسم من الشريط اللي على يمينك او من البارتيشنز اللي تحت ، علّم على اللي خلصته، واحفظ أهم اللينكات في المفضلة.</p>' +
         '<div class="flex flex-wrap gap-2 mt-6">' +
           '<span class="bp-chip" dir="ltr">' + depts.length + ' DEPTS</span>' +
           '<span class="bp-chip">' + totals.courses + ' مادة</span>' +
