@@ -268,11 +268,11 @@ h1,h2,h3,.font-black,.font-bold{font-family:var(--font-d)}
 ::-webkit-scrollbar-thumb{background:var(--el-accent);border-radius:4px}
 
 /* ---------- ظلال عصرية بطبقتين (وداعاً للمربّع الصلب 4px4px) — جولة 17 ⬇️ ---------- */
-.shadow-sm{box-shadow:0 2px 6px -2px rgba(16,29,56,.14),0 6px 18px -6px rgba(16,29,56,.18) !important}
-.dark .shadow-sm{box-shadow:0 2px 6px -2px rgba(0,0,0,.5),0 8px 22px -6px rgba(0,0,0,.55) !important}
-.shadow-md{box-shadow:0 4px 10px -3px rgba(16,29,56,.20),0 12px 30px -10px rgba(16,29,56,.24) !important}
+.shadow-sm{box-shadow:0 4px 10px -2px rgba(16,29,56,.24),0 12px 32px -6px rgba(16,29,56,.30) !important}
+.dark .shadow-sm{box-shadow:0 4px 10px -2px rgba(0,0,0,.60),0 12px 32px -6px rgba(0,0,0,.64),0 0 26px -8px rgba(64,124,255,.22) !important}
+.shadow-md{box-shadow:0 6px 16px -3px rgba(16,29,56,.28),0 20px 48px -10px rgba(16,29,56,.34) !important}
 .shadow-lg,.shadow-xl{box-shadow:0 10px 22px -8px rgba(16,29,56,.22),0 28px 60px -18px rgba(16,29,56,.28) !important}
-.dark .shadow-md,.dark .shadow-lg,.dark .shadow-xl{box-shadow:0 6px 16px -4px rgba(0,0,0,.60),0 20px 48px -14px rgba(0,0,0,.65) !important}
+.dark .shadow-md,.dark .shadow-lg,.dark .shadow-xl{box-shadow:0 8px 20px -4px rgba(0,0,0,.70),0 26px 60px -14px rgba(0,0,0,.74),0 0 34px -8px rgba(64,124,255,.24) !important}
 
 /* ---------- الشبكة التقنية (مربعات هندسية زرقاء رفيعة) ---------- */
 .dot-pattern,.dark .dot-pattern{
@@ -307,10 +307,10 @@ h1,h2,h3,.font-black,.font-bold{font-family:var(--font-d)}
 }
 .dark .bp-panel-frame{box-shadow:0 24px 60px -28px rgba(0,0,0,.6)}
 
-/* ---------- العنوان الرئيسي: كلمة بتدرّج حي + خط سفلي متدرّج ---------- */
+/* ---------- العنوان الرئيسي: كلمة بتدرّج حي — والخط السفلي تحت الكلمات الملوّنة بالظبط (ج25) ---------- */
 .site-title{font-family:var(--font-d) !important;letter-spacing:-.01em;position:relative;display:inline-block}
-.site-title::after{content:'';position:absolute;bottom:-9px;inset-inline-start:2px;width:58%;height:5px;border-radius:99px;background:var(--el-grad);opacity:.9}
-.bp-title-mark{background:var(--el-grad);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:elShift 7s ease-in-out infinite}
+.bp-title-mark{background:var(--el-grad);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:elShift 7s ease-in-out infinite;position:relative;display:inline-block}
+.bp-title-mark::after{content:'';position:absolute;bottom:-8px;inset-inline-start:0;width:100%;height:5px;border-radius:99px;background:var(--el-grad);opacity:.9}
 @keyframes elShift{0%,100%{background-position:0% 0}50%{background-position:100% 0}}
 
 /* ---------- حركة الاستقبال: سريعة وخفيفة (مفيش تعليق) ---------- */
@@ -453,33 +453,163 @@ button:active{transform:scale(.97)}
 .bp-dact.danger:hover{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.10)}
 
 /* ============================================================
-   ✨ جولة 17 — ظلال الكروت والأزرار (لايت + دارك × أدمن + يوزر)
-   الفلسفة: طبقتين ظل لكل عنصر (قريبة حادة تحدد الحواف + بعيدة ناعمة
-   بتدي عمق) بدل طبقة واحدة هزيلة — ونفس اللون الحيادي بتاع الموقع
-   rgba(16,29,56) في اللايت وأسود عميق في الدارك.
-   مفيش فلاتر ولا drop-shadow ولا أنيميشن: box-shadow ساكنة بس —
-   أداء ثابت مش بيأثر على سلاسة الموقع خالص ⚡
+   ✨ جولة 17+18 — ظلال الكروت والأزرار + الزجاج المُثلّج ورا الكروت
+   ج17: طبقتين ظل لكل عنصر (قريبة حادة + بعيدة ناعمة) بنفس اللون
+   الحيادي rgba(16,29,56) في اللايت وأسود عميق في الدارك.
+   ج18 (الجديد): الكروت بقت «زجاج مُثلّج» (frosted glass) — خلفية نص
+   شفافة + backdrop-filter بلور خفيف جداً، فبقت حاجز رايق بين المحتوى
+   والخلفية المتحركة: التيارات بتدوّر مُثلّجة ورا كل كرت، والكرت أخف
+   بصرياً وعليه لمعة شين من فوق (::before). وبما إن الغلاف نفسه
+   شفاف (.dot-pattern 45%/30%) فالبلور بيلقط الـ PCB الحقيقي ✅
+   وظلال الدارك اتقوّت بتوهج نيون خفيف جداً عشان الضل «يبان» فعلاً
+   على الخلفية الغامقة (الأسود لوحده كان بيضيع) — في النسختين.
+   الأداء (درس الجولة 7): بلور صغير 5-6px على الكروت بس، الهيدر
+   (.glass) والباقي من غير بلور زي ما هما، مفيش أنيميشن على البلور،
+   ومع prefers-reduced-motion بنسدّه خالص. لو المتصفح مبيفهمش
+   backdrop-filter أصلاً ⬅️ fallback لكرت شبه صلب محترم.
    ------------------------------------------------------------
-   آلية الوراثة هنا مقصودة:
-   • سطر «الزرار الأساسي» من غير !important ⬅️ أرضية ناعمة لأي زرار
-     ملوش كلاس ظل — وميكسّرش الظلال الخاصة الموجودة (year-tab.active
-     و bp-check:hover وكل كلاسات التيلويند shadow-* المُرقّاة فوق ⬆️).
-   • قواعد .bp-card بـ !important ⬅️ هي اللي بتحدد شكل الكروت النهائي
-     (بتكسب على shadow-sm المُرقّى لأنها مكتوبة بعده في الملف).
+   آلية الوراثة (نفس ج17): أرضية الأزرار من غير !important = ظل أساسي
+   بس، واللي معاه كلاس ظل أقوى ياخده (shadow-md المُرقّى، year-tab،
+   bp-check). وقواعد .bp-card بـ !important هي اللي حاكمة شكل الكروت.
    ============================================================ */
 
 /* 🔘 الأزرار — أرضية ناعمة (اللي معاه كلاس ظل أقوى بياخدها، زي أزرار الهيدر) */
 button{box-shadow:0 2px 8px -3px rgba(16,29,56,.28),inset 0 1px 0 rgba(255,255,255,.12)}
-.dark button{box-shadow:0 3px 10px -3px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08)}
+.dark button{box-shadow:0 4px 12px -3px rgba(0,0,0,.66),0 0 18px -5px rgba(64,124,255,.24),inset 0 1px 0 rgba(255,255,255,.08)}
 button:disabled{box-shadow:none !important}
 
-/* 🃏 الكروت التفاعلية (.bp-card = كروت الأقسام + الترمات + المواد + الفيديوهات والأقسام الفاضية) */
-.bp-card{box-shadow:0 2px 8px -2px rgba(16,29,56,.16),0 8px 24px -8px rgba(16,29,56,.20) !important}
-.dark .bp-card{box-shadow:0 3px 10px -3px rgba(0,0,0,.55),0 12px 30px -10px rgba(0,0,0,.62) !important}
+/* 🧊 الكروت الزجاجية المُثلّجة (.bp-card = الأقسام + الترمات + المواد + الفيديوهات) */
+.bp-card{background:rgba(255,255,255,.74) !important;backdrop-filter:blur(5px) saturate(1.08);-webkit-backdrop-filter:blur(5px) saturate(1.08);box-shadow:0 8px 18px -4px rgba(15,23,42,.28),0 26px 60px -12px rgba(15,23,42,.34) !important}
+.dark .bp-card{background:rgba(23,27,44,.60) !important;backdrop-filter:blur(6px) saturate(1.06);-webkit-backdrop-filter:blur(6px) saturate(1.06);box-shadow:0 8px 20px -4px rgba(0,0,0,.75),0 26px 64px -14px rgba(0,0,0,.80),0 0 42px -6px rgba(64,124,255,.32) !important}
+/* ✨ اللمعة: شين ضوئي خفيف على وش الزجاج */
+.bp-card::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 34%);pointer-events:none}
+.dark .bp-card::before{background:linear-gradient(180deg,rgba(140,170,255,.09),rgba(255,255,255,0) 30%)}
 /* هوفر الكرت: إطارة أزرق خفيفة + رفعة أوضح (بتشتغل مع فلاش ::after الموجودين) */
-.bp-card:hover{box-shadow:0 6px 16px -4px rgba(16,29,56,.24),0 18px 44px -12px rgba(37,99,235,.30) !important;border-color:rgba(99,102,241,.42) !important}
-.dark .bp-card:hover{box-shadow:0 8px 20px -6px rgba(0,0,0,.68),0 22px 50px -16px rgba(37,99,235,.34) !important;border-color:rgba(96,165,250,.45) !important}
+.bp-card:hover{box-shadow:0 10px 24px -4px rgba(16,29,56,.32),0 32px 68px -14px rgba(37,99,235,.42) !important;border-color:rgba(99,102,241,.55) !important}
+.dark .bp-card:hover{box-shadow:0 12px 28px -6px rgba(0,0,0,.78),0 32px 72px -18px rgba(37,99,235,.45),0 0 48px -8px rgba(64,124,255,.36) !important;border-color:rgba(96,165,250,.6) !important}
+
+/* 🪟 fallback: متصفح ميفهمش backdrop-filter ⬅️ كرت شبه صلب (الشكل يفضل محترم) */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+  .bp-card{background:rgba(255,255,255,.97) !important}
+  .dark .bp-card{background:rgba(23,27,44,.95) !important}
+}
+/* 🧘 احترام تقليل الحركة: سد البلور خالص (نفس سياسة الجولة 7 مع النبضات) */
+@media (prefers-reduced-motion: reduce) {
+  .bp-card,.dark .bp-card{backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
+  .bp-card{background:rgba(255,255,255,.97) !important}
+  .dark .bp-card{background:rgba(23,27,44,.95) !important}
+}
 
 /* 🗂️ بطاقات «الحالة الفاضية» (الإطار المتقطع) — ظل خفيف يديها حضور من غير ازدحام */
 div[class*="text-center"][class*="border-dashed"]{box-shadow:0 2px 8px -3px rgba(16,29,56,.16),0 8px 20px -8px rgba(16,29,56,.18)}
 .dark div[class*="text-center"][class*="border-dashed"]{box-shadow:0 3px 10px -4px rgba(0,0,0,.5),0 10px 24px -10px rgba(0,0,0,.55)}
+
+/* ============================================================
+   ✨ جولة 19 — رصّة بينتو للأقسام + زر مود ظاهر + توقيع الفوتر
+   • رصّة ديناميكية: كرت مميّز بياخد عمودين كل 6 (شريط ألوانه أسمك +
+     أيقونته أكبر + إطار ملوّن) — والتدفق dense بيملّى الفراغات لوحده.
+     النمط بيطلع إيقاع بصري حي بدل الصفوف المتكررة — وأول كرت في كل
+     جروب لافت للعين تلقائياً. (الموبايل/التابلت من غير spans — راحة أولاً)
+   • زرار اللايت/الدارك بقى جراديانت ظاهر (بنفسجي لايت / كهرماني دارك)
+     مع توهجه الخاص — ميبقاش تاني نفس لون الإطار اللي حواليه.
+   • «Created by abdallah elmohammady» بخط Changa بولد + جراديانت نص
+     (النسختين والوضعين).
+   ============================================================ */
+
+/* 🧱 رصّة البينتو — للشاشات الكبيرة بس */
+@media(min-width:1024px){
+  .bp-deptgrid{grid-auto-flow:row dense;grid-auto-rows:minmax(12.5rem,auto)}
+}
+
+/* 🌗 زرار تبديل المود — ظاهر بتوهجه الخاص */
+.bp-modetoggle{transition:transform .2s ease;box-shadow:0 4px 16px -4px rgba(99,102,241,.55),inset 0 1px 0 rgba(255,255,255,.4) !important}
+.bp-modetoggle:hover{transform:scale(1.08)}
+.dark .bp-modetoggle{box-shadow:0 4px 16px -4px rgba(251,146,60,.55),0 0 18px -4px rgba(251,146,60,.3),inset 0 1px 0 rgba(255,255,255,.5) !important}
+
+/* ✍️ توقيع الفوتر المميز */
+.bp-signature{font-family:'Changa',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.05em;background:linear-gradient(90deg,#4f46e5,#7c3aed,#0ea5e9);-webkit-background-clip:text;background-clip:text;color:transparent !important}
+.dark .bp-signature{background:linear-gradient(90deg,#a5b4fc,#c084fc,#67e8f9);-webkit-background-clip:text;background-clip:text;color:transparent !important}
+
+/* ============================================================
+   ✨ جولة 20 — بطل البينتو 2×2 + كروت أكبر + شادو دراماتيكي + توقيع مشاهير
+   • الكرت المميّز بقى بطل حقيقي: عمودين × صفّين (براوزة) — محتواه بيتوزّع
+     بالتساوي على الارتفاع (فليكس) فالشكل مظبوط مش مفرّغ.
+   • كل كروت الأقسام كبّرت: حشوة 1.4rem + أيقونة أضخم + عنوان أثقل —
+     على كل المقاسات، مش المكتبي بس.
+   • الشادوات اترفعت لدرجة «واضحة جداً» (لايت دراماتيكي مائل للكحلي +
+     دارك بأسود أعمق وتوهج نيون أنور) — من غير فلاتر: box-shadow بس.
+   • توقيع الفوتر بخط Great Vibes اليدوي (شبه توقيعات المشاهير 🖋️) —
+     بيتحمّل من جوجل فونتس مع باقي الخطوط في الصفحتين.
+   ============================================================ */
+
+/* 🧱 كروت أكبر — كل نقاط الكسر */
+.bp-deptgrid>.bp-card>div[class*="p-5"]{padding:1.6rem}
+.bp-deptgrid .bp-tile3d{width:3.5rem;height:3.5rem;font-size:1.45rem}
+.bp-deptgrid>.bp-card h3{font-size:1.2rem}
+.bp-deptgrid>.bp-card p[class*="text-xs"]{font-size:.85rem}
+
+/* 🖋️ توقيع بأسلوب المشاهير — خط يدوي فخور */
+.bp-signature{font-family:'Great Vibes','Changa',cursive;font-weight:400;font-size:1.55rem;letter-spacing:.01em}
+
+/* ============================================================
+   ✨ جولة 22 — كروت أقسام متساوية أكبر + توقيع RGB ناّور 🌈
+   • اتشال كرت البطل الممدود (قواعد 6n+1 spans من ج19/ج20): كل كروت
+     الأقسام بقت بنفس الحجم الكبير — صفوف 12.5rem، حشوة 1.6rem،
+     أيقونة 3.5rem، عنوان 1.2rem — والجريد بقى ٣ أعمدة كحد أقصى
+     (بدل 4) فكل كرت بياخد مساحة أعرض على الشاشة.
+   • توقيع «Created by abdallah elmohammady» بينوّر بألوان RGB
+     بتتحرك: جراديانت قوس قزح بيمشي (bpSignFlow) + توهج بيتنفّس
+     (bpSignGlow) — CSS خالص من غير JS.
+     prefers-reduced-motion بيوقّف الحركة فوراً (قفل ج7 محفوظ).
+   ============================================================ */
+
+/* 🌈 التوقيع الناوّر — RGB متحرك */
+.bp-signature{
+  background:linear-gradient(90deg,#ff004c,#ff8a00,#ffe600,#00e676,#00b0ff,#7c4dff,#ff004c);
+  background-size:600% 100%;-webkit-background-clip:text;background-clip:text;color:transparent !important;
+  animation:bpSignFlow 7s linear infinite,bpSignGlow 2.6s ease-in-out infinite alternate;
+}
+@keyframes bpSignFlow{to{background-position:600% 0}}
+@keyframes bpSignGlow{from{filter:drop-shadow(0 0 3px rgba(255,0,120,.35))}to{filter:drop-shadow(0 0 12px rgba(0,176,255,.55))}}
+@media(prefers-reduced-motion:reduce){
+  .bp-signature{animation:none !important}
+}
+
+/* ============================================================
+   ✍️ جولة 23 — توقيع بلون واحد هادي + خط Caveat مختلف
+   • بدل قوس قزح المتحرك (ج22): لون واحد ثابت — إنديجو عميق واضح في
+     اللايت (#4f46e5) وإنديجو فاتح لامع في الدارك (#a5b4fc).
+   • خط مختلف تمامًا: Caveat اليدوي الكاجوال (بيتحمّل من جوجل فونتس).
+     قواعد ج22 فضلت مكتوبة في الملف لتاريخها — الترتيب هنا لاحق فبيكسب.
+   ============================================================ */
+.bp-signature{
+  background:none !important;background-image:none !important;
+  -webkit-background-clip:border-box;background-clip:border-box;
+  color:#4f46e5 !important;
+  animation:none !important;filter:none !important;
+  font-family:'Caveat','Changa',cursive;font-weight:600;font-size:1.7rem;letter-spacing:.02em;
+}
+.dark .bp-signature{color:#a5b4fc !important}
+
+/* ============================================================
+   📺 جولة 24 — زوم متناسب على الشاشات الكبيرة + استرجاع مساحة الشريط
+   • اختيار المستخدم: تكبير متناسب — الخط الجذري 18px على اللابتوب
+     (112.5% من 1024px) و19px على الشاشات الكبيرة (118.75% من 1536px).
+     كل أحجام تايلويند rem فكله بيكبر بالتناسب: الحاويات والكروت
+     والشريط والحشو — المحتوى بقى «على قد الشاشة» فعلًا.
+   • (ج25) الشريط بقى درج عائم زي الموبايل على كل المقاسات — مفيش
+     إزاحة lg:pr-64 أصلًا، فاتشالت قاعدة استرجاع المساحة القديمة.
+   ============================================================ */
+@media(min-width:1024px){html{font-size:112.5%}}
+@media(min-width:1536px){html{font-size:118.75%}}
+
+/* ============================================================
+   🖱️ جولة 25 — سحب وإفلات الأدمن + لمسات واجهة
+   • .bp-dragging: العنصر اللي بيتسحب بيخفت.
+   • [data-dnd].bp-dropover: هدف الإفلات اللي تحت المؤشر بيلمع بإطار.
+   • .bp-grip: مقبض السحب (مؤشر قبضة) — موجودة في التوأمين حفاظًا على التطابق.
+   ============================================================ */
+.bp-dragging{opacity:.45}
+[data-dnd].bp-dropover{box-shadow:0 0 0 2px var(--el-accent),0 12px 26px -16px rgba(37,99,235,.4)}
+.bp-grip{cursor:grab}
+.bp-grip:active{cursor:grabbing}

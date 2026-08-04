@@ -434,7 +434,9 @@ function deptCounts(deptId) {
 function parseRoute() {
   const hash = (window.location.hash || '').replace(/^#/, '');
   const parts = hash.split('/').filter(Boolean);
-  const route = { dept: null, year: '1', term: null, course: null };
+  const route = { dept: null, year: '1', term: null, course: null, page: null };
+  /* صفحات الشريط الرأسي — كلمات محجوزة بتتفسّر قبل أي قسم (جولة 21) */
+  if (parts.length && RAIL_PAGES.indexOf(parts[0]) !== -1) { route.page = parts[0]; return route; }
   if (parts.length && deptOf(parts[0])) {
     route.dept = parts[0];
     const d = deptOf(route.dept);
@@ -614,17 +616,17 @@ function headerHTML(route) {
           '<div class="w-9 h-9 flex-shrink-0 rounded-lg flex items-center justify-center bp-tile3d" style="background:var(--bp-accent);font-size:1.05rem">' + iconSVG(dept ? dept.icon : 'fa-graduation-cap') + '</div>' +
           '<div class="min-w-0"><p class="bp-micro" style="margin-bottom:-2px">MATERIALS INDEX · SEC/' + (dept ? dept.id.toUpperCase() : 'ALL') + '</p>' +
           '<h1 class="text-sm sm:text-base font-bold text-gray-800 dark:text-white leading-tight truncate">' + esc(title) + '</h1>' +
-          '<p class="text-xs text-gray-400 dark:text-gray-500 hidden sm:block">مواد كل الأقسام — عام وبرامج نوعية 🎓</p></div>' +
+          '<p class="text-xs text-gray-400 dark:text-gray-500 hidden sm:block">مواد كل الأقسام — عام وبرامج نوعية</p></div>' +
         '</div>' +
       '</div>' +
-      '<button onclick="toggleDark()" title="الوضع الليلي" class="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-gray-700"><i class="fa ' + (darkMode ? 'fa-sun' : 'fa-moon') + '"></i></button>' +
+      '<button onclick="toggleDark()" title="الوضع الليلي" class="bp-modetoggle w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 dark:from-amber-400 dark:to-orange-500 text-white dark:text-gray-900 shadow-md"><i class="fa ' + (darkMode ? 'fa-sun' : 'fa-moon') + '"></i></button>' +
     '</div>' +
   '</header>';
 }
 function footerHTML() {
   return '<footer class="mt-auto text-center py-4 text-xs text-gray-400 dark:text-gray-600 border-t border-gray-100 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 glass">' +
     '<p class="bp-micro" style="margin-bottom:4px">ENG · MANS · BLUEPRINT EDITION</p>' +
-    '<span>made by abdallah elmohammady</span></footer>';
+    '<span class="bp-signature" dir="ltr">Created by abdallah elmohammady</span></footer>';
 }
 function deptCardHTML(d, counts, i) {
   const idx = ('0' + (allDepts().indexOf(d) + 1)).slice(-2);
@@ -656,39 +658,120 @@ function deptCardHTML(d, counts, i) {
 
 // ---------------- الرئيسية: كروت الأقسام ----------------
 function renderHome() {
-  const groups = ['general', 'special'];
-  let html =
-    '<div class="min-h-screen flex flex-col transition-colors duration-300 ' + (darkMode ? 'dark bg-gray-950' : 'bg-gray-50') + ' dot-pattern">' +
-      headerHTML({ dept: null }) +
-      '<main class="flex-1 max-w-7xl w-full mx-auto px-4 py-8">' +
-        '<div class="mb-10 bp-reveal bp-panel-frame relative overflow-hidden px-6 py-8 sm:px-10" style="--i:0">' +
-          '<span class="bp-crop tl"></span><span class="bp-crop tr"></span><span class="bp-crop bl"></span><span class="bp-crop br"></span>' +
-          '<p class="bp-micro">MANSOURA ENGINEERING · MATERIALS BLUEPRINT · V2</p>' +
-          '<h1 class="site-title text-3xl md:text-5xl font-black text-gray-800 dark:text-white mt-2 mb-4">مكتبة مواد <span class="bp-title-mark">كلية الهندسة</span></h1>' +
-          '<p class="text-gray-500 dark:text-gray-400 max-w-xl">اختار القسم من البارتيشنز اللي تحت، كل اللينكات والملخصات والملاحظات اللي الأدمنز رافعينها هتلاقيها جوا البارتيشن الخاص بيها</p>' +
-          '<div class="flex flex-wrap gap-2 mt-5">' +
-            '<span class="bp-chip" dir="ltr">' + allDepts().length + ' DEPTS</span>' +
-            '<span class="bp-chip">ترمين لكل فرقة</span>' +
-            '<span class="bp-chip">تابع تقدمك بالحلقات</span>' +
-          '</div>' +
-        '</div>';
-  groups.forEach((g, gi) => {
-    const depts = allDepts().filter(d => d.group === g);
-    html +=
-      '<div class="mb-10 bp-reveal" style="--i:' + (gi + 1) + '">' +
-        '<div class="flex items-center gap-3 mb-5">' +
-          '<div class="w-9 h-9 bg-gradient-to-br ' + (g === 'general' ? 'from-indigo-500 to-purple-600' : 'from-pink-500 to-rose-600') + ' rounded-xl flex items-center justify-center text-white"><i class="fa ' + (g === 'general' ? 'fa-building-columns' : 'fa-certificate') + ' text-sm"></i></div>' +
-          '<h2 class="text-xl font-black text-gray-800 dark:text-white">' + GROUP_NAMES[g] + '</h2>' +
-          '<span class="bp-micro" dir="ltr">' + (g === 'general' ? 'BLOCK / A' : 'BLOCK / B') + '</span>' +
-          '<span class="text-xs text-gray-400 font-semibold">' + depts.length + ' قسم</span>' +
-        '</div>' +
-        '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">' +
-          depts.map((d, di) => deptCardHTML(d, deptCounts(d.id), gi * 4 + di)).join('') +
-        '</div>' +
-      '</div>';
+  /* 🏠 الرئيسية (جولة 24): ترحيب نصّي + «في» جوه كتلة العنوان الملوّن مرة واحدة +
+     كارتين كبار + لوحة تقدّم بمرجع الأقسام اللي الطالب اشتغل فيها فعلًا — مش الموقع كله. */
+  const totals = { courses: 0, links: 0 };
+  const depts = allDepts();
+  depts.forEach(d => { const c = deptCounts(d.id); totals.courses += c.courses; totals.links += c.links; });
+  const generalCount = depts.filter(d => d.group === 'general').length;
+  const specialCount = depts.filter(d => d.group === 'special').length;
+  /* — تقدّم الطالب: اكتشاف تلقائي للأقسام اللي علّم فيها لينك/مادة — */
+  const deptAct = [];
+  depts.forEach(d => {
+    const blk = state.departments[d.id];
+    if (!blk || !blk.years) return;
+    let lt = 0, ld = 0, ct = 0, cd = 0;
+    (d.noYears ? ['1'] : YEAR_ORDER).forEach(y => (blk.years[y] || []).forEach(c => {
+      ct++;
+      (c.sections || []).forEach(s2 => (s2.links || []).forEach(l => { lt++; if (progress.links && progress.links[l.id]) ld++; }));
+      if (courseIsDone(c)) cd++;
+    }));
+    if (ld > 0 || cd > 0) deptAct.push({ name: d.name, lt: lt, ld: ld, ct: ct, cd: cd });
   });
-  html += '</main>' + footerHTML() + '</div>';
-  $('root').innerHTML = html;
+  const hasAct = deptAct.length > 0;
+  const linksTotal = deptAct.reduce((a, x) => a + x.lt, 0);
+  const linksDone = deptAct.reduce((a, x) => a + x.ld, 0);
+  const coursesTotal = deptAct.reduce((a, x) => a + x.ct, 0);
+  const coursesDone = deptAct.reduce((a, x) => a + x.cd, 0);
+  const favsCount = getFavs().length;
+  const pct = linksTotal ? (linksDone / linksTotal) : 0;
+  const pctTxt = Math.round(pct * 100) + '%';
+  const actNames = deptAct.map(x => x.name).join(' + ');
+  const RING_BIG_C = (2 * Math.PI * 44).toFixed(1);
+  const ringOff = (RING_BIG_C * (1 - pct)).toFixed(1);
+  const bigGroupCard = function (g, count) {
+    const isG = g === 'general';
+    return '<button onclick="railGo(\'' + g + '\')" class="bp-card card-hover text-right relative rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-8 sm:p-10 flex flex-col items-start gap-5 cursor-pointer min-h-[16rem]">' +
+      '<span class="bp-crop tl"></span><span class="bp-crop br"></span>' +
+      '<div class="w-16 h-16 bg-gradient-to-br ' + (isG ? 'from-indigo-500 to-purple-600' : 'from-pink-500 to-rose-600') + ' rounded-2xl flex items-center justify-center text-white text-3xl bp-tile3d shadow-lg flex-shrink-0"><i class="fa ' + (isG ? 'fa-building-columns' : 'fa-certificate') + '"></i></div>' +
+      '<div class="flex-1"><h2 class="text-2xl sm:text-3xl font-black text-gray-800 dark:text-white">' + GROUP_NAMES[g] + '</h2>' +
+      '<p class="text-sm font-bold text-indigo-500 dark:text-indigo-400 mt-1">' + count + ' قسم</p>' +
+      '<p class="text-sm text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">' + (isG ? 'أقسام الكلية الأساسية بكل موادها من الإعدادي للتخرج.' : 'برامج الساعات المعتمدة والبرامج النوعية المميزة.') + '</p></div>' +
+      '<span class="mt-auto inline-flex items-center gap-2 text-sm font-black text-white bg-gradient-to-l ' + (isG ? 'from-indigo-500 to-violet-600' : 'from-pink-500 to-rose-600') + ' px-5 py-2.5 rounded-2xl shadow-md">تصفح الكل <i class="fa fa-arrow-left"></i></span></button>';
+  };
+  const dashTile = function (label, value, icon, grad) {
+    return '<div class="bp-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-4 flex items-center gap-3">' +
+      '<div class="w-11 h-11 rounded-xl bg-gradient-to-br ' + grad + ' flex items-center justify-center text-white flex-shrink-0"><i class="fa ' + icon + '"></i></div>' +
+      '<div class="min-w-0"><p class="text-xl font-black text-gray-800 dark:text-white leading-none" dir="ltr">' + value + '</p><p class="text-xs text-gray-400 mt-1">' + label + '</p></div></div>';
+  };
+  const dashBody = hasAct
+    ? '<div class="grid lg:grid-cols-3 gap-6 items-center">' +
+        '<div class="flex flex-col items-center justify-center gap-3">' +
+          '<div class="relative w-28 h-28">' +
+            '<svg viewBox="0 0 110 110" class="w-28 h-28 -rotate-90">' +
+              '<circle class="bp-rbg" cx="55" cy="55" r="44" fill="none" stroke-width="10"></circle>' +
+              '<circle class="bp-rfg" cx="55" cy="55" r="44" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + RING_BIG_C + '" stroke-dashoffset="' + ringOff + '"></circle>' +
+            '</svg>' +
+            '<div class="absolute inset-0 flex flex-col items-center justify-center">' +
+              '<span class="text-2xl font-black text-gray-800 dark:text-white" dir="ltr">' + pctTxt + '</span>' +
+              '<span class="text-[11px] text-gray-400">من لينكاتك</span>' +
+            '</div>' +
+          '</div>' +
+          '<p class="text-xs text-gray-400 text-center max-w-[12rem]">علّم على أي لينك خلصته من صفحة مادته — والنسبة هنا بتتحدّث على طول</p>' +
+        '</div>' +
+        '<div class="grid grid-cols-2 gap-3">' +
+          dashTile('لينكات مكتملة', linksDone + '/' + linksTotal, 'fa-check-double', 'from-indigo-500 to-blue-600') +
+          dashTile('مواد مكتملة', coursesDone + '/' + coursesTotal, 'fa-graduation-cap', 'from-emerald-500 to-teal-600') +
+          dashTile('لينكات في المفضلة', String(favsCount), 'fa-heart', 'from-rose-500 to-pink-600') +
+          dashTile('نسبة الإنجاز الكلية', pctTxt, 'fa-bullseye', 'from-violet-500 to-purple-600') +
+        '</div>' +
+        '<div class="grid gap-3">' +
+          '<div class="bp-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-4 flex items-center gap-3">' +
+            '<div class="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500 to-sky-600 flex items-center justify-center text-white flex-shrink-0"><i class="fa fa-building-columns"></i></div>' +
+            '<div><p class="text-xl font-black text-gray-800 dark:text-white leading-none" dir="ltr">' + depts.length + '</p><p class="text-xs text-gray-400 mt-1">قسم وبرنامج في الموقع</p></div>' +
+          '</div>' +
+          '<div class="bp-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-4 flex items-center gap-3">' +
+            '<div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white flex-shrink-0"><i class="fa fa-book"></i></div>' +
+            '<div><p class="text-xl font-black text-gray-800 dark:text-white leading-none" dir="ltr">' + totals.courses + '</p><p class="text-xs text-gray-400 mt-1">مادة متاحة حاليًا</p></div>' +
+          '</div>' +
+          '<div class="bp-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-4 flex items-center gap-3">' +
+            '<div class="w-11 h-11 rounded-xl bg-gradient-to-br from-fuchsia-500 to-pink-600 flex items-center justify-center text-white flex-shrink-0"><i class="fa fa-link"></i></div>' +
+            '<div><p class="text-xl font-black text-gray-800 dark:text-white leading-none" dir="ltr">' + totals.links + '</p><p class="text-xs text-gray-400 mt-1">لينك مرفوع من الأدمنز</p></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<p class="text-xs text-gray-400 mt-5">بتتجمّع من نشاطك في: <span class="font-bold text-indigo-500">' + esc(actNames) + '</span> — اشتغلت في قسم تاني؟ هينضم للحساب لوحده.</p>'
+    : '<div class="text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-600">' +
+        '<div class="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/25 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl text-indigo-300"><i class="fa fa-flag-checkered"></i></div>' +
+        '<p class="text-gray-500 dark:text-gray-300 font-bold">لسه مبدأتش تقفل اللينكات</p>' +
+        '<p class="text-xs text-gray-400 mt-2 max-w-md mx-auto">علّم على أول لينك خلصته من صفحة أي مادة — واللوحة دي هتحسب تقدّمك على قسمك اللي بتشتغل فيه، مش على الموقع كله.</p></div>';
+  $('root').innerHTML =
+  '<div class="min-h-screen flex flex-col transition-colors duration-300 ' + (darkMode ? 'dark bg-gray-950' : 'bg-gray-50') + ' dot-pattern">' +
+    headerHTML({ dept: null }) +
+    '<main class="flex-1 max-w-7xl w-full mx-auto px-4 py-8">' +
+      '<div class="mb-8 bp-reveal bp-panel-frame relative overflow-hidden px-6 py-10 sm:px-12" style="--i:0">' +
+        '<span class="bp-crop tl"></span><span class="bp-crop tr"></span><span class="bp-crop bl"></span><span class="bp-crop br"></span>' +
+        '<p class="bp-micro">WELCOME · MANSOURA ENGINEERING · MATERIALS BLUEPRINT</p>' +
+        '<h1 class="site-title text-3xl md:text-5xl font-black text-gray-800 dark:text-white mt-2 mb-4">أهلاً بيك <span class="inline-block">في <span class="bp-title-mark">مكتبة مواد كلية الهندسة</span></span></h1>' +
+        '<p class="text-gray-500 dark:text-gray-400 max-w-xl">كل الملخصات واللينكات والمذكرات اللي الأدمنز رافعينها في مكان واحد — اختار قسمك من الشريط اللي على يمينك، علّم على اللي خلصته، واحفظ أهم اللينكات في المفضلة.</p>' +
+        '<div class="flex flex-wrap gap-2 mt-6">' +
+          '<span class="bp-chip" dir="ltr">' + depts.length + ' DEPTS</span>' +
+          '<span class="bp-chip">' + totals.courses + ' مادة</span>' +
+          '<span class="bp-chip">' + totals.links + ' لينك</span>' +
+          '<span class="bp-chip">مفضلة خاصة بجهازك</span>' +
+        '</div>' +
+      '</div>' +
+      resumeCardHTML() + /* ج25 */
+      '<div class="grid sm:grid-cols-2 gap-6 mb-8 bp-reveal" style="--i:1">' + bigGroupCard('general', generalCount) + bigGroupCard('special', specialCount) + '</div>' +
+      '<div class="bp-reveal bp-panel-frame relative overflow-hidden px-6 py-8 sm:px-9" style="--i:2">' +
+        '<span class="bp-crop tl"></span><span class="bp-crop tr"></span><span class="bp-crop bl"></span><span class="bp-crop br"></span>' +
+        '<p class="bp-micro">YOUR JOURNEY · PROGRESS</p>' +
+        '<h2 class="text-lg font-black text-gray-800 dark:text-white mt-1 mb-6"><i class="fa fa-chart-line text-indigo-400 ml-1"></i> لوحة تقدّمك</h2>' +
+        dashBody +
+      '</div>' +
+    '</main>' +
+    footerHTML() +
+  '</div>';
 }
 
 // ---------------- صفحة القسم: شريط الفرق + المواد ----------------
@@ -836,7 +919,7 @@ function renderDeptGrid() {
         (!q ? '<p class="text-gray-400 text-sm mt-2">أدمن القسم لسه مارفعش حاجة هنا — ارجع له تاني قريب</p>' : '') +
         '</div>'
       :
-        '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">' +
+        '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">' +
           filtered.map((c, i) => courseCardHTML(deptId, year, term || courseSem(c, deptId), c, i)).join('') +
         '</div>'
       ) +
@@ -852,18 +935,18 @@ function courseCardHTML(deptId, year, term, c, index) {
   return '' +
   '<div class="card-hover bp-card cursor-pointer group relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl bp-reveal" style="--i:' + index + '" onclick="openCourse(\'' + deptId + '\',\'' + year + '\',\'' + (term || courseSem(c, deptId)) + '\',\'' + c.id + '\')">' +
     '<span class="bp-crop tl"></span><span class="bp-crop br"></span>' +
-    '<div class="h-1.5 bg-gradient-to-r ' + color + '"></div>' +
-    '<div class="p-5">' +
+    '<div class="h-2 bg-gradient-to-r ' + color + '"></div>' +
+    '<div class="p-6">' +
       '<div class="flex items-start justify-between mb-4">' +
-        '<div class="w-12 h-12 bg-gradient-to-br ' + color + ' rounded-xl flex items-center justify-center text-white text-xl shadow-md overflow-hidden">' +
+        '<div class="w-14 h-14 bg-gradient-to-br ' + color + ' rounded-2xl flex items-center justify-center text-white text-2xl shadow-md overflow-hidden">' +
           (c.image ? '<img src="' + esc(c.image) + '" alt="" class="w-full h-full object-cover">' : iconSVG(c.icon || COURSE_ICONS[index % COURSE_ICONS.length])) +
         '</div>' +
         '<span class="bp-micro" dir="ltr">C/' + ('0' + (index + 1)).slice(-2) + '</span>' +
       '</div>' +
       '<div class="flex items-center gap-2 mb-1">' + (isGallery ? '<span class="text-xs bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 px-2 py-0.5 rounded-full font-medium">معرض صور</span>' : '') +
-      '<h3 class="font-bold text-gray-800 dark:text-white text-base leading-tight">' + esc(c.title) + '</h3></div>' +
-      '<p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + esc(c.doc || '') + '</p>' +
-      '<div class="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500 border-t border-gray-100 dark:border-gray-700 pt-3">' +
+      '<h3 class="font-bold text-gray-800 dark:text-white text-lg leading-tight">' + esc(c.title) + '</h3></div>' +
+      '<p class="text-sm text-gray-500 dark:text-gray-400 mb-5 leading-relaxed" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">' + esc(c.doc || '') + '</p>' +
+      '<div class="flex items-center gap-4 text-sm text-gray-400 dark:text-gray-500 border-t border-gray-100 dark:border-gray-700 pt-4">' +
         (isGallery ?
           '<span class="flex items-center gap-1"><i class="fa fa-images text-pink-400"></i><span>' + ((c.images || []).length) + ' صورة</span></span>'
         :
@@ -872,7 +955,7 @@ function courseCardHTML(deptId, year, term, c, index) {
           ((c.notes || []).length ? '<span class="flex items-center gap-1 mr-auto"><i class="fa fa-sticky-note text-amber-400"></i><span>' + c.notes.length + '</span></span>' : '')
         ) +
       '</div>' +
-      '<div class="flex items-center justify-between mt-3 gap-2">' +
+      '<div class="flex items-center justify-between mt-4 gap-2">' +
         '<span data-pjc="' + esc(c.id) + '" class="' + (coursePct(c) >= 1 ? 'bp-full' : '') + '">' + ringHTML(coursePct(c), st.total ? (st.done + '/' + st.total) : 'يدوي') + '</span>' +
         (manual ? '<button type="button" data-pjm="' + esc(c.id) + '" class="bp-donebtn' + (progress.courses[c.id] ? ' bp-on' : '') + '" onclick="event.stopPropagation();toggleCourseDone(\'' + c.id + '\')">' + (progress.courses[c.id] ? '<i class="fa fa-check"></i> مكتملة' : '<i class="fa fa-check"></i> علّمها كمكتملة') + '</button>' : '') +
       '</div>' +
@@ -898,23 +981,26 @@ function renderCourse(deptId, year, courseId) {
     const collapsed = !!collapsedSections[s.id];
     return '' +
     '<div class="bg-white dark:bg-gray-800 bp-card bp-reveal rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-4" style="--i:' + (si + 1) + '">' +
-      '<div class="flex items-center gap-2 px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 select-none" onclick="toggleSectionCollapse(\'' + s.id + '\')">' +
+      '<div class="flex items-center gap-2 px-4 py-3 lg:px-5 lg:py-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 select-none" onclick="toggleSectionCollapse(\'' + s.id + '\')">' +
         '<i class="fa fa-chevron-' + (collapsed ? 'down' : 'up') + ' text-gray-400 text-xs"></i>' +
         '<span class="bp-micro" dir="ltr">S' + ('0' + (si + 1)).slice(-2) + '</span>' +
-        '<span class="font-bold text-gray-800 dark:text-white text-sm flex-1 truncate">' + esc(s.name) + '</span>' +
-        (s.badge ? '<span class="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full font-semibold">' + esc(s.badge) + '</span>' : '') +
-        '<span class="text-xs text-gray-400">' + ((s.links || []).length) + ' رابط</span>' +
+        '<span class="font-bold text-gray-800 dark:text-white text-sm lg:text-base flex-1 truncate">' + esc(s.name) + '</span>' +
+        (s.badge ? '<span class="text-xs lg:text-sm bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full font-semibold">' + esc(s.badge) + '</span>' : '') +
+        '<span class="text-xs lg:text-sm text-gray-400">' + ((s.links || []).length) + ' رابط</span>' +
       '</div>' +
       (collapsed ? '' :
         '<div class="px-3 pb-3">' +
           (s.links || []).map(l =>
-            '<div data-pjl="' + esc(l.id) + '" class="' + (progress.links[l.id] ? 'bp-done ' : '') + 'flex items-center gap-2 py-1.5 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50">' +
+            '<div data-pjl="' + esc(l.id) + '" class="' + (progress.links[l.id] ? 'bp-done ' : '') + 'flex items-center gap-2 py-1.5 px-3 lg:py-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50">' +
               '<button type="button" title="علّم إنك خلصته" class="bp-check' + (progress.links[l.id] ? ' bp-on' : '') + '" onclick="event.stopPropagation();toggleLink(\'' + l.id + '\')"></button>' +
-              '<i class="' + getLinkIcon(l.url) + ' ' + getLinkColor(l.url) + ' text-sm w-4 flex-shrink-0"></i>' +
-              '<a href="' + esc(l.url) + '" target="_blank" rel="noopener noreferrer" class="flex-1 text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 truncate">' + esc(l.name) + '</a>' +
+              '<i class="' + getLinkIcon(l.url) + ' ' + getLinkColor(l.url) + ' text-sm lg:text-base w-4 lg:w-5 flex-shrink-0"></i>' +
+              '<a href="' + esc(l.url) + '" target="_blank" rel="noopener noreferrer" class="flex-1 text-sm lg:text-base text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 truncate">' + esc(l.name) + '</a>' +
+              '<a href="' + esc(l.url) + '" target="_blank" rel="noopener noreferrer" title="فتح اللينك في صفحة جديدة ↗" class="w-6 h-6 lg:w-7 lg:h-7 flex items-center justify-center rounded-md text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 flex-shrink-0" onclick="event.stopPropagation()"><i class="fa fa-arrow-up-right-from-square text-xs lg:text-sm"></i></a>' +
+              '<button type="button" title="نسخ اللينك" class="w-6 h-6 lg:w-7 lg:h-7 flex items-center justify-center rounded-md text-gray-300 dark:text-gray-600 hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/50 flex-shrink-0" onclick="event.stopPropagation();copyTextSmart(\'' + esc(l.url) + '\')"><i class="fa fa-copy text-xs lg:text-sm"></i></button>' +
+              '<button type="button" title="' + (isFav(l.id) ? 'شيل من المفضلة' : 'حفظ في المفضلة') + '" class="w-6 h-6 lg:w-7 lg:h-7 flex items-center justify-center rounded-md flex-shrink-0 ' + (isFav(l.id) ? 'text-rose-500' : 'text-gray-300 dark:text-gray-600 hover:text-rose-400') + '" onclick="event.stopPropagation();toggleFavById(\'' + l.id + '\',\'' + deptId + '\',\'' + year + '\',\'\',\'' + c.id + '\')"><i class="' + (isFav(l.id) ? 'fa-solid' : 'fa-regular') + ' fa-heart text-xs lg:text-sm"></i></button>' +
             '</div>'
           ).join('') +
-          ((s.links || []).length === 0 ? '<p class="text-xs text-gray-400 text-center py-2">لسه مفيش لينكات هنا</p>' : '') +
+          ((s.links || []).length === 0 ? '<p class="text-xs lg:text-sm text-gray-400 text-center py-2">لسه مفيش لينكات هنا</p>' : '') +
         '</div>'
       ) +
     '</div>';
@@ -929,36 +1015,37 @@ function renderCourse(deptId, year, courseId) {
           const ns = (darkMode ? NOTE_COLORS_DARK : NOTE_COLORS_LIGHT)[i % NOTE_COLORS_LIGHT.length];
           const dt = new Date(n.updatedAt || n.createdAt || Date.now());
           return '<div class="rounded-2xl p-4 shadow-md" style="background:' + ns.bg + ';color:' + ns.color + '">' +
-            '<p class="whitespace-pre-wrap text-sm font-medium leading-relaxed mb-3">' + esc(n.content) + '</p>' +
-            '<span class="text-xs opacity-70">' + dt.toLocaleDateString('ar-EG') + '</span>' +
+            '<p class="whitespace-pre-wrap text-sm lg:text-base font-medium leading-relaxed mb-3">' + esc(n.content) + '</p>' +
+            '<span class="text-xs lg:text-sm opacity-70">' + dt.toLocaleDateString('ar-EG') + '</span>' +
           '</div>';
         }).join('') +
       '</div>'
     );
 
+  setResume(deptId, year, c); /* ج25: سجّل «كمّل من حيث وقفت» */
   const html =
     '<div class="min-h-screen flex flex-col transition-colors duration-300 ' + (darkMode ? 'dark bg-gray-950' : 'bg-gray-50') + ' dot-pattern">' +
       headerHTML({ dept: deptId, course: courseId }) +
       '<main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6">' +
-        '<button onclick="closeCourseView(\'' + deptId + '\',\'' + year + '\',\'' + courseSem(c, deptId) + '\')" class="flex items-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-500 mb-4"><i class="fa fa-arrow-right"></i> رجوع لـ ' + esc((deptOf(deptId) || {}).name || '') + '</button>' +
+        '<button onclick="closeCourseView(\'' + deptId + '\',\'' + year + '\',\'' + courseSem(c, deptId) + '\')" class="flex items-center gap-2 text-sm lg:text-base font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-500 mb-4"><i class="fa fa-arrow-right"></i> رجوع لـ ' + esc((deptOf(deptId) || {}).name || '') + '</button>' +
         '<div class="rounded-3xl p-6 mb-6 bg-gradient-to-r ' + color + ' text-white shadow-lg fade-in bp-oncolor">' +
           '<div class="flex items-center gap-4 min-w-0">' +
             '<div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-2xl overflow-hidden flex-shrink-0">' + (c.image ? '<img src="' + esc(c.image) + '" class="w-full h-full object-cover" alt="">' : iconSVG(c.icon || 'fa-book')) + '</div>' +
-            '<div class="min-w-0"><h1 class="text-xl sm:text-2xl font-bold truncate">' + esc(c.title) + '</h1>' +
-              '<p class="text-white/80 text-sm mt-1 truncate">' + esc(c.doc || '') + '</p>' +
-              '<div class="flex gap-4 mt-2 text-sm text-white/70"><span><i class="fa fa-layer-group ml-1"></i>' + ((c.sections || []).length) + ' قسم</span><span><i class="fa fa-link ml-1"></i>' + totalLinks + ' رابط</span><span><i class="fa fa-sticky-note ml-1"></i>' + ((c.notes || []).length) + ' ملاحظة</span></div>' +
+            '<div class="min-w-0"><h1 class="text-xl sm:text-2xl lg:text-3xl font-bold truncate">' + esc(c.title) + '</h1>' +
+              '<p class="text-white/80 text-sm lg:text-base mt-1 truncate">' + esc(c.doc || '') + '</p>' +
+              '<div class="flex gap-4 lg:gap-5 mt-2 text-sm lg:text-base text-white/70"><span><i class="fa fa-layer-group ml-1"></i>' + ((c.sections || []).length) + ' قسم</span><span><i class="fa fa-link ml-1"></i>' + totalLinks + ' رابط</span><span><i class="fa fa-sticky-note ml-1"></i>' + ((c.notes || []).length) + ' ملاحظة</span></div>' +
               '<div class="flex items-center gap-3 mt-3 flex-wrap">' +
                 '<span data-pjc="' + esc(c.id) + '" class="' + (coursePct(c) >= 1 ? 'bp-full' : '') + '">' + ringHTML(coursePct(c), linkStats(c).total ? (linkStats(c).done + '/' + linkStats(c).total) : '') + '</span>' +
                 '<span class="bp-micro" style="color:rgba(255,255,255,.8)">PROGRESS · تقدمك</span>' +
-                '<button type="button" onclick="resetCourseProgress(\'' + c.id + '\')" class="text-xs font-bold px-3 py-1 rounded-lg" style="background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.25)">مسح التقدم</button>' +
-                (linkStats(c).total === 0 ? '<button type="button" data-pjm="' + esc(c.id) + '" class="text-xs font-bold px-3 py-1 rounded-lg" style="background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.25)" onclick="toggleCourseDone(\'' + c.id + '\')">' + (progress.courses[c.id] ? 'مكتملة ✓' : 'علّمها كمكتملة') + '</button>' : '') +
+                '<button type="button" onclick="resetCourseProgress(\'' + c.id + '\')" class="text-xs lg:text-sm font-bold px-3 py-1 lg:px-4 rounded-lg" style="background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.25)">مسح التقدم</button>' +
+                (linkStats(c).total === 0 ? '<button type="button" data-pjm="' + esc(c.id) + '" class="text-xs lg:text-sm font-bold px-3 py-1 lg:px-4 rounded-lg" style="background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.25)" onclick="toggleCourseDone(\'' + c.id + '\')">' + (progress.courses[c.id] ? 'مكتملة ✓' : 'علّمها كمكتملة') + '</button>' : '') +
               '</div>' +
             '</div>' +
           '</div>' +
         '</div>' +
         '<div class="flex gap-2 mb-6">' +
-          '<button onclick="setCourseTab(\'content\')" class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm ' + (isContent ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700') + '"><i class="fa fa-link"></i> المحتوى (' + totalLinks + ')</button>' +
-          '<button onclick="setCourseTab(\'notes\')" class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm ' + (!isContent ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700') + '"><i class="fa fa-sticky-note"></i> الملاحظات (' + ((c.notes || []).length) + ')</button>' +
+          '<button onclick="setCourseTab(\'content\')" class="flex items-center gap-2 px-5 py-2.5 lg:px-6 lg:py-3 rounded-xl font-semibold text-sm lg:text-base ' + (isContent ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700') + '"><i class="fa fa-link"></i> المحتوى (' + totalLinks + ')</button>' +
+          '<button onclick="setCourseTab(\'notes\')" class="flex items-center gap-2 px-5 py-2.5 lg:px-6 lg:py-3 rounded-xl font-semibold text-sm lg:text-base ' + (!isContent ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700') + '"><i class="fa fa-sticky-note"></i> الملاحظات (' + ((c.notes || []).length) + ')</button>' +
         '</div>' +
         (isContent ?
           '<div class="fade-in">' +
@@ -971,26 +1058,86 @@ function renderCourse(deptId, year, courseId) {
   $('root').innerHTML = html;
 }
 
+/* ======================= ج25 — «كمّل من حيث وقفت»: آخر مادة فتحتها على جهازك ======================= */
+const RESUME_KEY = 'eng_resume_v1';
+function getResume() { try { const r = JSON.parse(localStorage.getItem(RESUME_KEY) || 'null'); return (r && r.deptId && r.courseId) ? r : null; } catch (e) { return null; } }
+function setResume(deptId, year, c) {
+  if (!deptId || !c || !c.id) return;
+  try { localStorage.setItem(RESUME_KEY, JSON.stringify({ deptId: deptId, year: year || '1', term: courseSem(c, deptId), courseId: c.id, at: Date.now() })); } catch (e) {}
+}
+function clearResume() { try { localStorage.removeItem(RESUME_KEY); } catch (e) {} render(); }
+function timeAgoAr(t) {
+  const m = Math.max(0, Math.round((Date.now() - t) / 60000));
+  if (m < 1) return 'دلوقتي حالاً';
+  if (m < 60) return 'من ' + m + (m === 1 ? ' دقيقة' : ' دقايق');
+  const h = Math.floor(m / 60);
+  if (h < 24) return 'من ' + h + (h === 1 ? ' ساعة' : ' ساعات');
+  const d = Math.floor(h / 24);
+  return 'من ' + d + (d === 1 ? ' يوم' : ' أيام');
+}
+function resumeCardHTML() {
+  const r = getResume();
+  if (!r) return '';
+  const d = deptOf(r.deptId);
+  if (!d) return '';
+  const c = findCourse(r.deptId, r.year, r.courseId);
+  if (!c) return ''; // المادة ممكن تكون اتعدلت/اتشالت — الكارت بيختفي لوحده
+  const color = c.color || 'from-indigo-500 to-violet-600';
+  return '' +
+  '<div class="mb-8 bp-reveal bp-panel-frame relative overflow-hidden px-5 py-4 sm:px-7 flex items-center gap-4 flex-wrap" style="--i:0" data-testid="resume-card">' +
+    '<div class="w-12 h-12 rounded-2xl bg-gradient-to-br ' + color + ' text-white flex items-center justify-center text-lg shadow-md flex-shrink-0"><i class="fa fa-circle-play"></i></div>' +
+    '<div class="min-w-0 flex-1">' +
+      '<p class="bp-micro">RESUME · كمّل من حيث وقفت</p>' +
+      '<p class="font-black text-gray-800 dark:text-white text-base sm:text-lg truncate">' + esc(c.title) + '</p>' +
+      '<p class="text-xs text-gray-400 truncate">' + esc(d.name) + ' · ' + timeAgoAr(r.at || Date.now()) + '</p>' +
+    '</div>' +
+    '<button type="button" class="h-10 px-5 rounded-xl bg-gradient-to-l from-indigo-500 to-violet-600 text-white font-bold text-sm shadow-md flex items-center gap-2 flex-shrink-0" onclick="railGo(\'' + courseHash(r.deptId, r.year, courseSem(c, r.deptId), c.id) + '\')"><i class="fa fa-circle-play"></i> كمّل دلوقتي</button>' +
+    '<button type="button" title="إخفاء الكارت" class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 dark:text-gray-600 hover:text-gray-500 flex-shrink-0" onclick="clearResume()"><i class="fa fa-xmark"></i></button>' +
+  '</div>';
+}
+/* 📋 ج25 — نسخ اللينك للحافظة: Clipboard API الحديث + فول-باك آمن للمتصفحات القديمة/الصفحات المحلية */
+function copyFallback(t) {
+  var ok = null;
+  try {
+    var ta = document.createElement('textarea');
+    ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    ok = document.execCommand ? document.execCommand('copy') : null;
+    ta.remove();
+  } catch (e) { ok = false; }
+  showToast(ok === false ? 'مقدرتش أنسخ — انسخه يدوي' : 'اللينك اتنسخ ✓', ok === false ? 'error' : 'success');
+}
+function copyTextSmart(t) {
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(function () { showToast('اللينك اتنسخ ✓', 'success'); }, function () { copyFallback(t); });
+      return;
+    }
+  } catch (e) {}
+  copyFallback(t);
+}
+
 // ---------------- المعرض ----------------
 function renderGallery(deptId, year, c) {
   courseTitleCache = c.title;
+  setResume(deptId, year, c); /* ج25 */
   const color = c.color || 'from-pink-500 to-rose-600';
   const imgs = c.images || [];
   const html =
     '<div class="min-h-screen flex flex-col transition-colors duration-300 ' + (darkMode ? 'dark bg-gray-950' : 'bg-gray-50') + ' dot-pattern">' +
       headerHTML({ dept: deptId, course: c.id }) +
       '<main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6">' +
-        '<button onclick="closeCourseView(\'' + deptId + '\',\'' + year + '\',\'' + courseSem(c, deptId) + '\')" class="flex items-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-500 mb-4"><i class="fa fa-arrow-right"></i> رجوع</button>' +
+        '<button onclick="closeCourseView(\'' + deptId + '\',\'' + year + '\',\'' + courseSem(c, deptId) + '\')" class="flex items-center gap-2 text-sm lg:text-base font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-500 mb-4"><i class="fa fa-arrow-right"></i> رجوع</button>' +
         '<div class="rounded-3xl p-6 mb-6 bg-gradient-to-r ' + color + ' text-white shadow-lg fade-in bp-oncolor">' +
           '<div class="flex items-center gap-4">' +
             '<div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-2xl overflow-hidden flex-shrink-0">' + (c.image ? '<img src="' + esc(c.image) + '" class="w-full h-full object-cover" alt="">' : iconSVG('images')) + '</div>' +
             '<div><h1 class="text-xl sm:text-2xl font-bold">' + esc(c.title) + '</h1><p class="text-white/80 text-sm mt-1">' + esc(c.doc || '') + '</p>' +
             '<div class="flex items-center gap-3 mt-3 flex-wrap">' +
               '<span data-pjc="' + esc(c.id) + '" class="' + (coursePct(c) >= 1 ? 'bp-full' : '') + '">' + ringHTML(coursePct(c), '') + '</span>' +
-              '<button type="button" data-pjm="' + esc(c.id) + '" class="text-xs font-bold px-3 py-1 rounded-lg" style="background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.25)" onclick="toggleCourseDone(\'' + c.id + '\')">' + (progress.courses[c.id] ? 'مكتملة ✓' : 'علّمها كمكتملة') + '</button>' +
-              '<button type="button" onclick="resetCourseProgress(\'' + c.id + '\')" class="text-xs font-bold px-3 py-1 rounded-lg" style="background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.25)">مسح التقدم</button>' +
+              '<button type="button" data-pjm="' + esc(c.id) + '" class="text-xs lg:text-sm font-bold px-3 py-1 lg:px-4 rounded-lg" style="background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.25)" onclick="toggleCourseDone(\'' + c.id + '\')">' + (progress.courses[c.id] ? 'مكتملة ✓' : 'علّمها كمكتملة') + '</button>' +
+              '<button type="button" onclick="resetCourseProgress(\'' + c.id + '\')" class="text-xs lg:text-sm font-bold px-3 py-1 lg:px-4 rounded-lg" style="background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.25)">مسح التقدم</button>' +
             '</div>' +
-            '<div class="flex gap-4 mt-2 text-sm text-white/70"><span><i class="fa fa-image ml-1"></i>' + imgs.length + ' صورة</span></div></div>' +
+            '<div class="flex gap-4 lg:gap-5 mt-2 text-sm lg:text-base text-white/70"><span><i class="fa fa-image ml-1"></i>' + imgs.length + ' صورة</span></div></div>' +
           '</div>' +
         '</div>' +
         (imgs.length === 0 ?
@@ -1035,7 +1182,8 @@ function render() {
     return;
   }
   const route = parseRoute();
-  if (!route.dept) { renderHome(); return; }
+  if (route.page) { renderPage(route); appendRail(); return; }
+  if (!route.dept) { renderHome(); appendRail(); return; }
   const d = deptOf(route.dept);
   const year = d.noYears ? '1' : route.year;
   if (route.course) {
@@ -1045,6 +1193,228 @@ function render() {
   } else {
     renderDept(route.dept, year);
   }
+  appendRail();
+}
+
+
+// ---------------- 🧭 جولة 21-24: الشريط الرأسي (بلسان إخفاء) + الصفحات + المفضلة + الفيد + البحث — والمعاينة اتلغت نهائيًا في ج24 ----------------
+const RAIL_PAGES = ['general', 'special', 'favorites', 'recent', 'search'];
+let railOpen = false;
+function toggleRailDrawer() { railOpen = !railOpen; appendRail(); }
+function closeRailDrawer() { if (!railOpen) return; railOpen = false; appendRail(); }
+function railGo(h) { railOpen = false; window.location.hash = (h === 'home') ? '' : h; }
+function railLinkHTML(it, activeKey) {
+  const on = (activeKey === it.key);
+  return '<button class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-colors ' +
+    (on ? 'bg-gradient-to-l from-indigo-500 to-violet-600 text-white shadow-md' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800') +
+    '" onclick="railGo(\'' + it.hash + '\')">' +
+    '<span class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ' + (on ? 'bg-white/20' : 'bg-gray-100 dark:bg-gray-800 text-indigo-500 dark:text-indigo-400') + '"><i class="fa ' + it.icon + '"></i></span>' +
+    '<span>' + it.label + '</span></button>';
+}
+/* الشريط بيتركّب بعد أي رندر على جذر الصفحة (fixed — مالوش مكان في الفلو)
+   ج25: الإخفاء/الإظهار بقى زي الموبايل بالظبط على كل المقاسات — زرار عائم + درج،
+   من غير حفظ حالة في الجهاز ومن غير أي رسايل مع كل فتح/قفل */
+function appendRail() {
+  const old = document.getElementById('bp-rail-wrap');
+  if (old) old.remove();
+  let route;
+  try { route = parseRoute(); } catch (e) { route = { page: null, dept: null }; }
+  const d = route.dept ? deptOf(route.dept) : null;
+  const activeKey = route.page || (d ? d.group : 'home');
+  const items = [
+    { key: 'home', hash: 'home', icon: 'fa-house', label: 'الرئيسية' },
+    { key: 'general', hash: 'general', icon: 'fa-building-columns', label: 'الأقسام العامة' },
+    { key: 'special', hash: 'special', icon: 'fa-certificate', label: 'البرامج النوعية' },
+    { key: 'search', hash: 'search', icon: 'fa-magnifying-glass', label: 'بحث عام' },
+    { key: 'favorites', hash: 'favorites', icon: 'fa-heart', label: 'المفضلة' },
+    { key: 'recent', hash: 'recent', icon: 'fa-clock-rotate-left', label: 'آخر الإضافات' }
+  ];
+  const links = items.map(it => railLinkHTML(it, activeKey)).join('');
+  const wrap = document.createElement('div');
+  wrap.id = 'bp-rail-wrap';
+  wrap.innerHTML =
+    '<button type="button" aria-label="قائمة الصفحات" class="fixed bottom-5 right-5 z-[60] w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg flex items-center justify-center text-lg" onclick="toggleRailDrawer()"><i class="fa ' + (railOpen ? 'fa-xmark' : 'fa-bars') + '"></i></button>' +
+    '<div class="fixed inset-0 z-[59] bg-black/50 transition-opacity ' + (railOpen ? 'opacity-100' : 'opacity-0 pointer-events-none') + '" onclick="closeRailDrawer()"></div>' +
+    '<aside class="fixed top-0 bottom-0 right-0 z-[60] w-72 max-w-[85vw] flex flex-col gap-1.5 px-4 py-6 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 shadow-xl transition-transform duration-300 ' + (railOpen ? 'translate-x-0' : 'translate-x-full') + '" aria-label="شريط الصفحات">' +
+      '<div class="flex items-center justify-between mb-4"><p class="bp-micro">SECTIONS · NAV</p><button type="button" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500" onclick="closeRailDrawer()"><i class="fa fa-xmark"></i></button></div>' +
+      links +
+    '</aside>';
+  (document.getElementById('root') || document.body).appendChild(wrap);
+}
+
+/* 🏗️ شلّ الصفحات الجديدة — نفس جلد الموقع */
+function pageShellHTML(bodyHTML, micro, title, sub) {
+  return '' +
+  '<div class="min-h-screen flex flex-col transition-colors duration-300 ' + (darkMode ? 'dark bg-gray-950' : 'bg-gray-50') + ' dot-pattern">' +
+    headerHTML({ dept: null }) +
+    '<main class="flex-1 max-w-7xl w-full mx-auto px-4 py-8">' +
+      '<div class="mb-8 bp-reveal bp-panel-frame relative overflow-hidden px-6 py-7 sm:px-9" style="--i:0">' +
+        '<span class="bp-crop tl"></span><span class="bp-crop tr"></span><span class="bp-crop bl"></span><span class="bp-crop br"></span>' +
+        '<p class="bp-micro">' + micro + '</p>' +
+        '<h1 class="text-2xl md:text-3xl font-black text-gray-800 dark:text-white mt-1.5 mb-2">' + title + '</h1>' +
+        (sub ? '<p class="text-sm text-gray-500 dark:text-gray-400 max-w-xl">' + sub + '</p>' : '') +
+      '</div>' +
+      bodyHTML +
+    '</main>' +
+    footerHTML() +
+  '</div>';
+}
+function renderPage(route) {
+  if (route.page === 'general' || route.page === 'special') renderGroupPage(route.page);
+  else if (route.page === 'favorites') renderFavoritesPage();
+  else if (route.page === 'recent') renderRecentPage();
+  else if (route.page === 'search') renderSearchPage();
+}
+function renderGroupPage(g) {
+  const depts = allDepts().filter(d => d.group === g);
+  const grid = '<div class="bp-deptgrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">' +
+    depts.map((d, di) => deptCardHTML(d, deptCounts(d.id), di)).join('') + '</div>';
+  const sub = (g === 'general') ? 'أقسام الكلية الأساسية — من الاعدادي لحد التخرج' : 'برامج الساعات المعتمدة والبرامج النوعية ✨';
+  $('root').innerHTML = pageShellHTML(grid, 'BLOCK / ' + (g === 'general' ? 'A' : 'B') + ' · ' + depts.length + ' DEPTS', GROUP_NAMES[g], sub);
+}
+
+
+/* ======================= المفضلة (على جهاز الطالب — أيقونة قلب مش إيموجي) ======================= */
+const FAVS_KEY = 'eng_favs_v1';
+function getFavs() { try { const f = JSON.parse(localStorage.getItem(FAVS_KEY) || '[]'); return Array.isArray(f) ? f : []; } catch (e) { return []; } }
+function setFavs(f) { try { localStorage.setItem(FAVS_KEY, JSON.stringify(f)); } catch (e) {} }
+function isFav(lid) { return getFavs().some(x => x && x.lid === lid); }
+function courseHash(deptId, year, term, courseId) {
+  const d = deptOf(deptId);
+  if (!d) return deptId;
+  return (d.noYears
+    ? (deptId + (term ? ('/' + term) : ''))
+    : (deptId + '/' + year + (term ? ('/' + term) : ''))) + '/' + courseId;
+}
+function toggleFavById(lid, deptId, year, term, courseId) {
+  const f = getFavs();
+  const ix = f.findIndex(x => x && x.lid === lid);
+  if (ix > -1) {
+    const nm = f[ix] && f[ix].name;
+    f.splice(ix, 1); setFavs(f);
+    showToast('اتشال «' + (nm || 'اللينك') + '» من المفضلة', 'success');
+  } else {
+    const c = findCourse(deptId, year, courseId);
+    let link = null;
+    (c && c.sections ? c.sections : []).forEach(s => (s.links || []).forEach(l => { if (l.id === lid) link = l; }));
+    if (!link) return;
+    const d = deptOf(deptId);
+    f.push({ lid: lid, name: link.name, url: link.url, deptId: deptId, deptName: d ? d.name : deptId, year: year, courseId: courseId, courseTitle: c ? (c.title || '') : '', at: Date.now() });
+    setFavs(f);
+    showToast('اتحفظ في المفضلة — هتلاقيه في صفحة المفضلة من الشريط', 'success');
+  }
+  render();
+}
+function favRowHTML(x) {
+  const filled = isFav(x.lid);
+  return '' +
+  '<div class="bp-card card-hover relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex items-center gap-3 p-4 mb-2">' +
+    '<i class="' + getLinkIcon(x.url) + ' ' + getLinkColor(x.url) + ' text-base w-5 flex-shrink-0"></i>' +
+    '<div class="min-w-0 flex-1 cursor-pointer" onclick="window.location.hash=\'' + courseHash(x.deptId, x.year, '', x.courseId) + '\'">' +
+      '<p class="text-sm font-bold text-gray-800 dark:text-white truncate">' + esc(x.name) + '</p>' +
+      '<p class="text-xs text-gray-400 truncate">' + esc(x.deptName) + (x.courseTitle ? ' · ' + esc(x.courseTitle) : '') + '</p>' +
+    '</div>' +
+    '<button type="button" title="نسخ اللينك" class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-300 dark:text-gray-600 hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/50 flex-shrink-0" onclick="copyTextSmart(\'' + esc(x.url) + '\')"><i class="fa fa-copy text-xs"></i></button>' +
+    '<a href="' + esc(x.url) + '" target="_blank" rel="noopener noreferrer" title="فتح اللينك في صفحة جديدة" class="h-7 px-3 inline-flex items-center gap-1.5 rounded-lg text-xs font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-900/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/70 flex-shrink-0"><i class="fa fa-arrow-up-right-from-square text-[10px]"></i> فتح ↗</a>' +
+    '<button type="button" title="' + (filled ? 'شيل من المفضلة' : 'حفظ في المفضلة') + '" class="w-7 h-7 flex items-center justify-center rounded-lg flex-shrink-0 ' + (filled ? 'text-rose-500' : 'text-gray-300 dark:text-gray-600 hover:text-rose-400') + '" onclick="toggleFavById(\'' + x.lid + '\',\'' + x.deptId + '\',\'' + x.year + '\',\'\',\'' + x.courseId + '\')"><i class="' + (filled ? 'fa-solid' : 'fa-regular') + ' fa-heart text-xs"></i></button>' +
+  '</div>';
+}
+function renderFavoritesPage() {
+  const f = getFavs().slice().reverse();
+  const body = f.length
+    ? f.map(x => favRowHTML(x)).join('')
+    : '<div class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-600">' +
+      '<div class="w-20 h-20 bg-rose-50 dark:bg-rose-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl text-rose-300"><i class="fa fa-heart"></i></div>' +
+      '<p class="text-gray-400 font-medium">مفيش لينكات محفوظة لسه</p>' +
+      '<p class="text-xs text-gray-400 mt-2">علّم على أي لينك بأيقونة القلب <i class="fa-regular fa-heart text-rose-400"></i> من صفحة مادته — وهتلاقيه جاهز هنا على طول.</p></div>';
+  $('root').innerHTML = pageShellHTML(body, 'FAVORITES · ' + f.length + ' LINKS', 'المفضلة <i class="fa-solid fa-heart text-rose-500"></i>', 'أهم اللينكات اللي حفظتها بنفسك — بتتخزّن على جهازك بس.');
+}
+
+/* ======================= أحدث الإضافات 🕐 ======================= */
+/* بترتيب الإضافة في الملف نفسه: بنمشي على كل الأقسام والمواد بالترتيب
+   وناخد آخر N — من غير أي تغيير في شكل البيانات الأصلي */
+function collectRecent(limit) {
+  const out = [];
+  allDepts().forEach(d => {
+    const blk = state.departments[d.id];
+    if (!blk || !blk.years) return;
+    const years = d.noYears ? ['1'] : YEAR_ORDER;
+    years.forEach(y => {
+      (blk.years[y] || []).forEach(c => {
+        (c.sections || []).forEach(s2 => {
+          (s2.links || []).forEach(l => {
+            out.push({ lid: l.id, name: l.name, url: l.url, deptId: d.id, deptName: d.name, year: y, courseId: c.id, courseTitle: c.title || '' });
+          });
+        });
+      });
+    });
+  });
+  return out.slice(Math.max(0, out.length - (limit || 30))).reverse();
+}
+function renderRecentPage() {
+  /* جولة 23: آخر ٥ إضافات بس — مفيش تكديس */
+  const list = collectRecent(5);
+  const body = list.length
+    ? list.map(x => favRowHTML(x)).join('')
+    : '<div class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-600"><p class="text-gray-400 font-medium">لسه مفيش إضافات</p></div>';
+  $('root').innerHTML = pageShellHTML(body, 'FRESH DROPS · ' + list.length, 'آخر الإضافات 🕐', 'آخر ٥ لينكات اتضافت على الموقع — الأجدد أولاً.');
+}
+
+/* ======================= البحث العام 🔍 ======================= */
+let globalQuery = '';
+function onGlobalSearch(v) {
+  globalQuery = v;
+  const r = document.getElementById('g-results');
+  if (r) r.innerHTML = globalSearchHTML(v);
+}
+function globalSearchHTML(v) {
+  const q = (v || '').trim().toLowerCase();
+  if (q.length < 2) return '<p class="text-center text-sm text-gray-400 py-10">اكتب حرفين على الأقل عشان يبدأ البحث 🔍</p>';
+  const courses = [], links = [];
+  allDepts().forEach(d => {
+    const blk = state.departments[d.id];
+    if (!blk || !blk.years) return;
+    const years = d.noYears ? ['1'] : YEAR_ORDER;
+    years.forEach(y => (blk.years[y] || []).forEach(c => {
+      if (courses.length < 24 && (c.title || '').toLowerCase().indexOf(q) !== -1) {
+        courses.push({ deptId: d.id, deptName: d.name, year: y, courseId: c.id, title: c.title, color: c.color });
+      }
+      (c.sections || []).forEach(s2 => (s2.links || []).forEach(l => {
+        if (links.length >= 60) return;
+        if ((l.name || '').toLowerCase().indexOf(q) !== -1 || (l.url || '').toLowerCase().indexOf(q) !== -1) {
+          links.push({ lid: l.id, name: l.name, url: l.url, deptId: d.id, deptName: d.name, year: y, courseId: c.id, courseTitle: c.title || '' });
+        }
+      }));
+    }));
+  });
+  if (!courses.length && !links.length) {
+    return '<div class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-600">' +
+      '<div class="w-20 h-20 bg-gray-100 dark:bg-gray-700/40 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl text-gray-300"><i class="fa fa-magnifying-glass"></i></div>' +
+      '<p class="text-gray-400 font-medium">مفيش نتائج لـ «' + esc(v) + '»</p></div>';
+  }
+  let h = '';
+  if (courses.length) {
+    h += '<p class="bp-micro mb-3">COURSES · ' + courses.length + '</p><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">' +
+      courses.map(x =>
+        '<div class="bp-card card-hover cursor-pointer relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-4" onclick="window.location.hash=\'' + courseHash(x.deptId, x.year, '', x.courseId) + '\'">' +
+          '<div class="flex items-center gap-3">' +
+            '<div class="w-10 h-10 bg-gradient-to-br ' + (x.color || COURSE_COLORS[0]) + ' rounded-xl flex items-center justify-center text-white bp-tile3d flex-shrink-0"><i class="fa fa-book"></i></div>' +
+            '<div class="min-w-0"><p class="font-bold text-sm text-gray-800 dark:text-white truncate">' + esc(x.title) + '</p><p class="text-xs text-gray-400 truncate">' + esc(x.deptName) + '</p></div>' +
+          '</div></div>').join('') + '</div>';
+  }
+  if (links.length) h += '<p class="bp-micro mb-3">LINKS · ' + links.length + '</p>' + links.map(x => favRowHTML(x)).join('');
+  return h;
+}
+function renderSearchPage() {
+  $('root').innerHTML = pageShellHTML(
+    '<div class="mb-4 relative">' +
+      '<i class="fa fa-magnifying-glass absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>' +
+      '<input id="g-search" value="' + esc(globalQuery) + '" oninput="onGlobalSearch(this.value)" placeholder="دوّر على مادة أو لينك في الموقع كله..." class="w-full pr-11 pl-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm bp-search">' +
+    '</div>' +
+    '<div id="g-results">' + globalSearchHTML(globalQuery) + '</div>',
+    'GLOBAL SEARCH · ALL DEPTS', 'بحث عام 🔍', 'بيدوّر في كل الأقسام والبرامج النوعية مرة واحدة — مواد ولينكات.');
+  const inp = document.getElementById('g-search');
+  if (inp && globalQuery) { try { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); } catch (e) {} }
 }
 
 // ---------------- إقلاع ----------------
