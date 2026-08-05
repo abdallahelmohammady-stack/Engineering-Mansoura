@@ -375,11 +375,12 @@ function normalizeState(s) {
 }
 let state = defaultState();
 let dataReady = false;
+let LAST_EXPORT_AT = null; /* ج26: تاريخ آخر تصدير للمحتوى — بيظهر كتشيب في الرئيسية */
 async function loadState() {
   // SitesLoader الموحّد: fetch ← نسخة مدمجة ← شاشة تشخيص
   try {
     const pack = await window.SitesLoader.load();
-    if (pack) state = normalizeState(pack.data);
+    if (pack) { state = normalizeState(pack.data); if (pack.data && typeof pack.data.exportedAt === 'number') LAST_EXPORT_AT = pack.data.exportedAt; /* ج26 */ }
   } finally {
     dataReady = true;
   }
@@ -624,7 +625,7 @@ function headerHTML(route) {
   '</header>';
 }
 function footerHTML() {
-  return '<footer class="mt-auto text-center py-4 text-xs text-gray-400 dark:text-gray-600 border-t border-gray-100 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 glass">' +
+  return '<footer class="mt-auto text-center py-4 pb-24 lg:pb-6 text-xs text-gray-400 dark:text-gray-600 border-t border-gray-100 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 glass">' +
     '<p class="bp-micro" style="margin-bottom:4px">ENG · MANS · BLUEPRINT EDITION</p>' +
     '<span class="bp-signature" dir="ltr">Created by abdallah elmohammady</span></footer>';
 }
@@ -700,51 +701,51 @@ function renderHome() {
       '<span class="mt-auto inline-flex items-center gap-2 text-sm font-black text-white bg-gradient-to-l ' + (isG ? 'from-indigo-500 to-violet-600' : 'from-pink-500 to-rose-600') + ' px-5 py-2.5 rounded-2xl shadow-md">تصفح الكل <i class="fa fa-arrow-left"></i></span></button>';
   };
   const dashTile = function (label, value, icon, grad) {
-    return '<div class="bp-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-4 flex items-center gap-3">' +
-      '<div class="w-11 h-11 rounded-xl bg-gradient-to-br ' + grad + ' flex items-center justify-center text-white flex-shrink-0"><i class="fa ' + icon + '"></i></div>' +
-      '<div class="min-w-0"><p class="text-xl font-black text-gray-800 dark:text-white leading-none" dir="ltr">' + value + '</p><p class="text-xs text-gray-400 mt-1">' + label + '</p></div></div>';
+    return '<div class="bp-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-3 sm:p-4 flex items-center gap-2 sm:gap-3">' +
+      '<div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br ' + grad + ' flex items-center justify-center text-white flex-shrink-0"><i class="fa ' + icon + '"></i></div>' +
+      '<div class="min-w-0"><p class="text-lg sm:text-xl font-black text-gray-800 dark:text-white leading-none" dir="ltr">' + value + '</p><p class="text-[11px] sm:text-xs text-gray-400 mt-1 leading-snug">' + label + '</p></div></div>';
   };
   const dashBody = hasAct
-    ? '<div class="grid lg:grid-cols-3 gap-6 items-center">' +
+    ? '<div class="grid lg:grid-cols-3 gap-4 sm:gap-6 items-center">' +
         '<div class="flex flex-col items-center justify-center gap-3">' +
-          '<div class="relative w-28 h-28">' +
-            '<svg viewBox="0 0 110 110" class="w-28 h-28 -rotate-90">' +
+          '<div class="relative w-24 h-24 sm:w-28 sm:h-28">' +
+            '<svg viewBox="0 0 110 110" class="w-24 h-24 sm:w-28 sm:h-28 -rotate-90">' +
               '<circle class="bp-rbg" cx="55" cy="55" r="44" fill="none" stroke-width="10"></circle>' +
               '<circle class="bp-rfg" cx="55" cy="55" r="44" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + RING_BIG_C + '" stroke-dashoffset="' + ringOff + '"></circle>' +
             '</svg>' +
             '<div class="absolute inset-0 flex flex-col items-center justify-center">' +
-              '<span class="text-2xl font-black text-gray-800 dark:text-white" dir="ltr">' + pctTxt + '</span>' +
+              '<span class="text-xl sm:text-2xl font-black text-gray-800 dark:text-white" dir="ltr">' + pctTxt + '</span>' +
               '<span class="text-[11px] text-gray-400">من لينكاتك</span>' +
             '</div>' +
           '</div>' +
-          '<p class="text-xs text-gray-400 text-center max-w-[12rem]">علّم على أي لينك خلصته من صفحة مادته — والنسبة هنا بتتحدّث على طول</p>' +
+          '<p class="text-[11px] sm:text-xs text-gray-400 text-center max-w-[11rem] sm:max-w-[13rem]">علّم على أي لينك خلصته من صفحة مادته — والنسبة هنا بتتحدّث على طول</p>' +
         '</div>' +
-        '<div class="grid grid-cols-2 gap-3">' +
+        '<div class="grid grid-cols-2 gap-2 sm:gap-3">' +
           dashTile('لينكات مكتملة', linksDone + '/' + linksTotal, 'fa-check-double', 'from-indigo-500 to-blue-600') +
           dashTile('مواد مكتملة', coursesDone + '/' + coursesTotal, 'fa-graduation-cap', 'from-emerald-500 to-teal-600') +
           dashTile('لينكات في المفضلة', String(favsCount), 'fa-heart', 'from-rose-500 to-pink-600') +
           dashTile('نسبة الإنجاز الكلية', pctTxt, 'fa-bullseye', 'from-violet-500 to-purple-600') +
         '</div>' +
-        '<div class="grid gap-3">' +
-          '<div class="bp-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-4 flex items-center gap-3">' +
-            '<div class="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500 to-sky-600 flex items-center justify-center text-white flex-shrink-0"><i class="fa fa-building-columns"></i></div>' +
-            '<div><p class="text-xl font-black text-gray-800 dark:text-white leading-none" dir="ltr">' + depts.length + '</p><p class="text-xs text-gray-400 mt-1">قسم وبرنامج في الموقع</p></div>' +
+        '<div class="grid gap-2 sm:gap-3">' +
+          '<div class="bp-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-3 sm:p-4 flex items-center gap-2 sm:gap-3">' +
+            '<div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-cyan-500 to-sky-600 flex items-center justify-center text-white flex-shrink-0"><i class="fa fa-building-columns"></i></div>' +
+            '<div><p class="text-lg sm:text-xl font-black text-gray-800 dark:text-white leading-none" dir="ltr">' + depts.length + '</p><p class="text-[11px] sm:text-xs text-gray-400 mt-1 leading-snug">قسم وبرنامج في الموقع</p></div>' +
           '</div>' +
-          '<div class="bp-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-4 flex items-center gap-3">' +
-            '<div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white flex-shrink-0"><i class="fa fa-book"></i></div>' +
-            '<div><p class="text-xl font-black text-gray-800 dark:text-white leading-none" dir="ltr">' + totals.courses + '</p><p class="text-xs text-gray-400 mt-1">مادة متاحة حاليًا</p></div>' +
+          '<div class="bp-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-3 sm:p-4 flex items-center gap-2 sm:gap-3">' +
+            '<div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white flex-shrink-0"><i class="fa fa-book"></i></div>' +
+            '<div><p class="text-lg sm:text-xl font-black text-gray-800 dark:text-white leading-none" dir="ltr">' + totals.courses + '</p><p class="text-[11px] sm:text-xs text-gray-400 mt-1 leading-snug">مادة متاحة حاليًا</p></div>' +
           '</div>' +
-          '<div class="bp-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-4 flex items-center gap-3">' +
-            '<div class="w-11 h-11 rounded-xl bg-gradient-to-br from-fuchsia-500 to-pink-600 flex items-center justify-center text-white flex-shrink-0"><i class="fa fa-link"></i></div>' +
-            '<div><p class="text-xl font-black text-gray-800 dark:text-white leading-none" dir="ltr">' + totals.links + '</p><p class="text-xs text-gray-400 mt-1">لينك مرفوع من الأدمنز</p></div>' +
+          '<div class="bp-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-3 sm:p-4 flex items-center gap-2 sm:gap-3">' +
+            '<div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-fuchsia-500 to-pink-600 flex items-center justify-center text-white flex-shrink-0"><i class="fa fa-link"></i></div>' +
+            '<div><p class="text-lg sm:text-xl font-black text-gray-800 dark:text-white leading-none" dir="ltr">' + totals.links + '</p><p class="text-[11px] sm:text-xs text-gray-400 mt-1 leading-snug">لينك مرفوع من الأدمنز</p></div>' +
           '</div>' +
         '</div>' +
       '</div>' +
-      '<p class="text-xs text-gray-400 mt-5">بتتجمّع من نشاطك في: <span class="font-bold text-indigo-500">' + esc(actNames) + '</span> — اشتغلت في قسم تاني؟ هينضم للحساب لوحده.</p>'
+      '<p class="text-[11px] sm:text-xs text-gray-400 mt-4 sm:mt-5 leading-relaxed">بتتجمّع من نشاطك في: <span class="font-bold text-indigo-500">' + esc(actNames) + '</span> — اشتغلت في قسم تاني؟ هينضم للحساب لوحده.</p>'
     : '<div class="text-center py-10 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-600">' +
         '<div class="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/25 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl text-indigo-300"><i class="fa fa-flag-checkered"></i></div>' +
         '<p class="text-gray-500 dark:text-gray-300 font-bold">لسه مبدأتش تقفل اللينكات</p>' +
-        '<p class="text-xs text-gray-400 mt-2 max-w-md mx-auto">علّم على أول لينك خلصته من صفحة أي مادة — واللوحة دي هتحسب تقدّمك على القسم اللي بتشتغل فيه، مش على الموقع كله.</p></div>';
+        '<p class="text-xs text-gray-400 mt-2 max-w-md mx-auto">علّم على أول لينك خلصته من صفحة أي مادة — واللوحة دي هتحسب تقدّمك على قسمك اللي بتشتغل فيه، مش على الموقع كله.</p></div>';
   $('root').innerHTML =
   '<div class="min-h-screen flex flex-col transition-colors duration-300 ' + (darkMode ? 'dark bg-gray-950' : 'bg-gray-50') + ' dot-pattern">' +
     headerHTML({ dept: null }) +
@@ -753,12 +754,13 @@ function renderHome() {
         '<span class="bp-crop tl"></span><span class="bp-crop tr"></span><span class="bp-crop bl"></span><span class="bp-crop br"></span>' +
         '<p class="bp-micro">WELCOME · MANSOURA ENGINEERING · MATERIALS BLUEPRINT</p>' +
         '<h1 class="site-title text-3xl md:text-5xl font-black text-gray-800 dark:text-white mt-2 mb-4">أهلاً بيك <span class="inline-block">في <span class="bp-title-mark">مكتبة مواد كلية الهندسة</span></span></h1>' +
-        '<p class="text-gray-500 dark:text-gray-400 max-w-xl">كل الملخصات واللينكات والمذكرات اللي الأدمنز رافعينها في مكان واحد — اختار القسم من الشريط اللي على يمينك او من البارتيشنز اللي تحت ، علّم على اللي خلصته، واحفظ أهم اللينكات في المفضلة.</p>' +
+        '<p class="text-gray-500 dark:text-gray-400 max-w-xl">كل الملخصات واللينكات والمذكرات اللي الأدمنز رافعينها في مكان واحد — اختار القسم من الشريط اللي على يمينك او من البارتيشنز اللي تحت ، علّم على اللي خلصته، واحفظ أهم اللينكات في المفضلة</p>' +
         '<div class="flex flex-wrap gap-2 mt-6">' +
           '<span class="bp-chip" dir="ltr">' + depts.length + ' DEPTS</span>' +
           '<span class="bp-chip">' + totals.courses + ' مادة</span>' +
           '<span class="bp-chip">' + totals.links + ' لينك</span>' +
           '<span class="bp-chip">مفضلة خاصة بجهازك</span>' +
+          (LAST_EXPORT_AT ? '<span class="bp-chip"><i class="fa fa-clock-rotate-left"></i> آخر تحديث: ' + timeAgoAr(LAST_EXPORT_AT) + '</span>' : '') + /* ج26 */
         '</div>' +
       '</div>' +
       resumeCardHTML() + /* ج25 */
@@ -766,7 +768,7 @@ function renderHome() {
       '<div class="bp-reveal bp-panel-frame relative overflow-hidden px-6 py-8 sm:px-9" style="--i:2">' +
         '<span class="bp-crop tl"></span><span class="bp-crop tr"></span><span class="bp-crop bl"></span><span class="bp-crop br"></span>' +
         '<p class="bp-micro">YOUR JOURNEY · PROGRESS</p>' +
-        '<h2 class="text-lg font-black text-gray-800 dark:text-white mt-1 mb-6"><i class="fa fa-chart-line text-indigo-400 ml-1"></i> لوحة تقدّمك</h2>' +
+        '<h2 class="text-base sm:text-lg font-black text-gray-800 dark:text-white mt-1 mb-4 sm:mb-6"><i class="fa fa-chart-line text-indigo-400 ml-1"></i> لوحة تقدّمك</h2>' +
         dashBody +
       '</div>' +
     '</main>' +
@@ -995,6 +997,7 @@ function renderCourse(deptId, year, courseId) {
               '<button type="button" title="علّم إنك خلصته" class="bp-check' + (progress.links[l.id] ? ' bp-on' : '') + '" onclick="event.stopPropagation();toggleLink(\'' + l.id + '\')"></button>' +
               '<i class="' + getLinkIcon(l.url) + ' ' + getLinkColor(l.url) + ' text-sm lg:text-base w-4 lg:w-5 flex-shrink-0"></i>' +
               '<a href="' + esc(l.url) + '" target="_blank" rel="noopener noreferrer" class="flex-1 text-sm lg:text-base text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 truncate">' + esc(l.name) + '</a>' +
+              (l.star ? '<span class="inline-flex items-center gap-1 text-[10px] font-black text-amber-500 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-full flex-shrink-0" title="لينك مهم"><i class="fa fa-star"></i> مهم</span>' : '') + /* ج26 */
               '<a href="' + esc(l.url) + '" target="_blank" rel="noopener noreferrer" title="فتح اللينك في صفحة جديدة ↗" class="w-6 h-6 lg:w-7 lg:h-7 flex items-center justify-center rounded-md text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 flex-shrink-0" onclick="event.stopPropagation()"><i class="fa fa-arrow-up-right-from-square text-xs lg:text-sm"></i></a>' +
               '<button type="button" title="نسخ اللينك" class="w-6 h-6 lg:w-7 lg:h-7 flex items-center justify-center rounded-md text-gray-300 dark:text-gray-600 hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/50 flex-shrink-0" onclick="event.stopPropagation();copyTextSmart(\'' + esc(l.url) + '\')"><i class="fa fa-copy text-xs lg:text-sm"></i></button>' +
               '<button type="button" title="' + (isFav(l.id) ? 'شيل من المفضلة' : 'حفظ في المفضلة') + '" class="w-6 h-6 lg:w-7 lg:h-7 flex items-center justify-center rounded-md flex-shrink-0 ' + (isFav(l.id) ? 'text-rose-500' : 'text-gray-300 dark:text-gray-600 hover:text-rose-400') + '" onclick="event.stopPropagation();toggleFavById(\'' + l.id + '\',\'' + deptId + '\',\'' + year + '\',\'\',\'' + c.id + '\')"><i class="' + (isFav(l.id) ? 'fa-solid' : 'fa-regular') + ' fa-heart text-xs lg:text-sm"></i></button>' +
@@ -1269,7 +1272,7 @@ function renderGroupPage(g) {
   const depts = allDepts().filter(d => d.group === g);
   const grid = '<div class="bp-deptgrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">' +
     depts.map((d, di) => deptCardHTML(d, deptCounts(d.id), di)).join('') + '</div>';
-  const sub = (g === 'general') ? 'أقسام الكلية الأساسية — من الاعدادي لحد التخرج' : 'برامج الساعات المعتمدة والبرامج النوعية ✨';
+  const sub = (g === 'general') ? 'أقسام الكلية الأساسية — من الاعدادي لحد التخرج' : 'برامج الساعات المعتمدة والبرامج النوعية';
   $('root').innerHTML = pageShellHTML(grid, 'BLOCK / ' + (g === 'general' ? 'A' : 'B') + ' · ' + depts.length + ' DEPTS', GROUP_NAMES[g], sub);
 }
 
@@ -1305,6 +1308,16 @@ function toggleFavById(lid, deptId, year, term, courseId) {
   }
   render();
 }
+/* ج26: النجمة بتتقرا حيّة من الداتا — لو اللينك اتعلّم «مهم» من الأدمن */
+function starOfFav(x) {
+  try {
+    const c = findCourse(x.deptId, x.year, x.courseId);
+    if (!c) return false;
+    let st = false;
+    (c.sections || []).forEach(function (sc) { (sc.links || []).forEach(function (lk) { if (lk.id === x.lid && lk.star) st = true; }); });
+    return st;
+  } catch (e) { return false; }
+}
 function favRowHTML(x) {
   const filled = isFav(x.lid);
   return '' +
@@ -1312,21 +1325,39 @@ function favRowHTML(x) {
     '<i class="' + getLinkIcon(x.url) + ' ' + getLinkColor(x.url) + ' text-base w-5 flex-shrink-0"></i>' +
     '<div class="min-w-0 flex-1 cursor-pointer" onclick="window.location.hash=\'' + courseHash(x.deptId, x.year, '', x.courseId) + '\'">' +
       '<p class="text-sm font-bold text-gray-800 dark:text-white truncate">' + esc(x.name) + '</p>' +
-      '<p class="text-xs text-gray-400 truncate">' + esc(x.deptName) + (x.courseTitle ? ' · ' + esc(x.courseTitle) : '') + '</p>' +
+      '<p class="text-xs text-gray-400 truncate">' + esc(x.deptName) + (x.courseTitle ? ' · ' + esc(x.courseTitle) : '') + (starOfFav(x) ? ' <span class="font-black text-amber-500"><i class="fa fa-star"></i> مهم</span>' : '') + '</p>' +
     '</div>' +
     '<button type="button" title="نسخ اللينك" class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-300 dark:text-gray-600 hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/50 flex-shrink-0" onclick="copyTextSmart(\'' + esc(x.url) + '\')"><i class="fa fa-copy text-xs"></i></button>' +
     '<a href="' + esc(x.url) + '" target="_blank" rel="noopener noreferrer" title="فتح اللينك في صفحة جديدة" class="h-7 px-3 inline-flex items-center gap-1.5 rounded-lg text-xs font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-900/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/70 flex-shrink-0"><i class="fa fa-arrow-up-right-from-square text-[10px]"></i> فتح ↗</a>' +
     '<button type="button" title="' + (filled ? 'شيل من المفضلة' : 'حفظ في المفضلة') + '" class="w-7 h-7 flex items-center justify-center rounded-lg flex-shrink-0 ' + (filled ? 'text-rose-500' : 'text-gray-300 dark:text-gray-600 hover:text-rose-400') + '" onclick="toggleFavById(\'' + x.lid + '\',\'' + x.deptId + '\',\'' + x.year + '\',\'\',\'' + x.courseId + '\')"><i class="' + (filled ? 'fa-solid' : 'fa-regular') + ' fa-heart text-xs"></i></button>' +
   '</div>';
 }
+/* ج26: فلتر الأقسام في المفضلة — تشيبس تطلع بس لما يكون في أكتر من قسم */
+let favFilter = 'all';
+function setFavFilter(id) { favFilter = id || 'all'; renderFavoritesPage(); }
+function favChipHTML(id, label, n) {
+  const on = (favFilter === id);
+  return '<button type="button" data-testid="fav-chip" data-chip="' + esc(id) + '" onclick="setFavFilter(\'' + esc(id) + '\')" class="h-8 px-3.5 rounded-full text-xs font-black inline-flex items-center gap-1.5 transition-colors ' +
+    (on ? 'bg-gradient-to-l from-rose-500 to-pink-600 text-white shadow-md' : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-rose-300') + '">' +
+    '<i class="fa ' + (id === 'all' ? 'fa-layer-group' : 'fa-bookmark') + ' text-[10px]"></i>' + esc(label) + '<span dir="ltr" class="opacity-75">' + n + '</span></button>';
+}
 function renderFavoritesPage() {
-  const f = getFavs().slice().reverse();
-  const body = f.length
+  const fAll = getFavs().slice().reverse();
+  const seen = [];
+  fAll.forEach(function (x) { if (x && x.deptId && seen.indexOf(x.deptId) < 0) seen.push(x.deptId); });
+  const f = (favFilter === 'all') ? fAll : fAll.filter(function (x) { return x && x.deptId === favFilter; });
+  let chips = '';
+  if (seen.length > 1) {
+    chips = '<div class="flex flex-wrap gap-2 mb-4">' + favChipHTML('all', 'الكل', fAll.length) +
+      seen.map(function (id) { const d = deptOf(id); const nm = d ? d.name : (fAll.find(function (x) { return x.deptId === id; }) || {}).deptName || id;
+        return favChipHTML(id, nm, fAll.filter(function (x) { return x.deptId === id; }).length); }).join('') + '</div>';
+  }
+  const body = chips + (f.length
     ? f.map(x => favRowHTML(x)).join('')
     : '<div class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-600">' +
       '<div class="w-20 h-20 bg-rose-50 dark:bg-rose-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl text-rose-300"><i class="fa fa-heart"></i></div>' +
-      '<p class="text-gray-400 font-medium">مفيش لينكات محفوظة لسه</p>' +
-      '<p class="text-xs text-gray-400 mt-2">علّم على أي لينك بأيقونة القلب <i class="fa-regular fa-heart text-rose-400"></i> من صفحة مادته — وهتلاقيه جاهز هنا على طول.</p></div>';
+      '<p class="text-gray-400 font-medium">' + (fAll.length ? 'مفيش لينكات في القسم ده' : 'مفيش لينكات محفوظة لسه') + '</p>' +
+      (fAll.length ? '' : '<p class="text-xs text-gray-400 mt-2">علّم على أي لينك بأيقونة القلب <i class="fa-regular fa-heart text-rose-400"></i> من صفحة مادته — وهتلاقيه جاهز هنا على طول.</p>') + '</div>');
   $('root').innerHTML = pageShellHTML(body, 'FAVORITES · ' + f.length + ' LINKS', 'المفضلة <i class="fa-solid fa-heart text-rose-500"></i>', 'أهم اللينكات اللي حفظتها بنفسك — بتتخزّن على جهازك بس.');
 }
 
