@@ -613,3 +613,9 @@ div[class*="text-center"][class*="border-dashed"]{box-shadow:0 2px 8px -3px rgba
 [data-dnd].bp-dropover{box-shadow:0 0 0 2px var(--el-accent),0 12px 26px -16px rgba(37,99,235,.4)}
 .bp-grip{cursor:grab}
 .bp-grip:active{cursor:grabbing}
+
+/* ============================================================
+   🛝 جولة 26 — سحب أنعم: مؤشر «قبضة ماسكة» على الصفحة كلها أثناء الدراج
+   (الجوست الصغير + حركة FLIP بيتعملوا بـ inline JS — هنا بس المؤشر)
+   ============================================================ */
+body.bp-dnd-active,body.bp-dnd-active *{cursor:grabbing !important}
