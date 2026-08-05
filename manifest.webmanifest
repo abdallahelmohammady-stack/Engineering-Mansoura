@@ -1,0 +1,16 @@
+{
+  "name": "مكتبة مواد كلية الهندسة",
+  "short_name": "مواد الهندسة",
+  "description": "كل الملخصات واللينكات والمذكرات اللي الأدمنز رافعينها في مكان واحد",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "dir": "rtl",
+  "lang": "ar",
+  "background_color": "#0b1020",
+  "theme_color": "#4f46e5",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
